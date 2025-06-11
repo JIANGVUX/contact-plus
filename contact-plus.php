@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Contact Plus
  * Description: Plugin hiển thị nút liên hệ nổi có tùy chỉnh thiết lập
- * Version: 2.1.2
+ * Version: 2.1.3
  * Author: JiangVux
  */
 
@@ -126,17 +126,18 @@ add_action('admin_init', function() {
 add_action('wp_footer', function() {
     if (!get_option('contact_plus_license_key')) return;
 
-    $toggle_img = esc_url(get_option('zalo_toggle_img', plugins_url('assets/default-toggle.png', __FILE__)));
-    $call_img = esc_url(get_option('zalo_call_img', plugins_url('assets/default-call.png', __FILE__)));
-    $zalo_img = esc_url(get_option('zalo_zalo_img', plugins_url('assets/default-zalo.png', __FILE__)));
-    $messenger_img = esc_url(get_option('messenger_img'));
-    if (!$messenger_img) {
-        $messenger_img = plugins_url('assets/default-messenger.png', __FILE__);
-    }
-    $shopee_img = esc_url(get_option('shopee_img'));
-    if (!$shopee_img) {
-        $shopee_img = plugins_url('assets/default-shopee.png', __FILE__);
-    }
+    $toggle_img     = get_option('zalo_toggle_img');
+    $call_img       = get_option('zalo_call_img');
+    $zalo_img       = get_option('zalo_zalo_img');
+    $messenger_img  = get_option('messenger_img');
+    $shopee_img     = get_option('shopee_img');
+
+    $toggle_img     = esc_url($toggle_img ?: plugins_url('assets/default-toggle.png', __FILE__));
+    $call_img       = esc_url($call_img   ?: plugins_url('assets/default-call.png', __FILE__));
+    $zalo_img       = esc_url($zalo_img   ?: plugins_url('assets/default-zalo.png', __FILE__));
+    $messenger_img  = esc_url($messenger_img ?: plugins_url('assets/default-messenger.png', __FILE__));
+    $shopee_img     = esc_url($shopee_img ?: plugins_url('assets/default-shopee.png', __FILE__));
+
     $messenger_link = esc_url(get_option('messenger_link'));
     $shopee_link = esc_url(get_option('shopee_link'));
 
