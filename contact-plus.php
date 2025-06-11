@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Contact Plus
  * Description: Plugin hiển thị nút liên hệ nổi có tùy chỉnh thiết lập
- * Version: 2.3.1
+ * Version: 2.3.2
  * Author: JiangVux
  */
 
@@ -72,13 +72,9 @@ function contact_plus_settings_page() {
 
 add_action('admin_init', function() {
     $fields = [
-        'zalo_enable','messenger_enable','shopee_enable',
-        'zalo_toggle_img','zalo_phone','zalo_call_img','zalo_zalo_img','messenger_img','shopee_img',
-        'messenger_link','shopee_link',
-        'viber_enable','viber_img','viber_link',
-        'whatsapp_enable','whatsapp_img','whatsapp_link',
-        'lazada_enable','lazada_img','lazada_link',
-        'tiki_enable','tiki_img','tiki_link',
+        'zalo_enable','messenger_enable','shopee_enable','viber_enable','whatsapp_enable','lazada_enable','tiki_enable',
+        'zalo_toggle_img','zalo_phone','zalo_call_img','zalo_zalo_img','messenger_img','shopee_img','viber_img','whatsapp_img','lazada_img','tiki_img',
+        'messenger_link','shopee_link','viber_link','whatsapp_link','lazada_link','tiki_link',
         'zalo_position_side','zalo_position_offset'
     ];
     foreach ($fields as $field) {
@@ -87,8 +83,7 @@ add_action('admin_init', function() {
 
     add_settings_section('main', 'Cấu hình hiển thị', null, 'contact-plus');
 
-    $bool_fields = ['zalo','messenger','shopee','viber','whatsapp','lazada','tiki'];
-    foreach ($bool_fields as $key) {
+    foreach (['zalo','messenger','shopee','viber','whatsapp','lazada','tiki'] as $key) {
         add_settings_field($key.'_enable', "Bật $key", function() use ($key) {
             echo '<input type="checkbox" name="'.$key.'_enable" value="1" ' . checked(get_option($key.'_enable'), '1', false) . '> Hiển thị '.ucfirst($key);
         }, 'contact-plus', 'main');
@@ -130,32 +125,33 @@ add_action('wp_footer', function() {
     $phone = esc_attr(get_option('zalo_phone'));
     $side = esc_attr(get_option('zalo_position_side', 'right'));
     $bottom = intval(get_option('zalo_position_offset', 90));
-
     $position_css = $side === 'left' ? 'left:12px;right:auto;' : 'right:12px;left:auto;';
     $style_attr = $position_css . " bottom:{$bottom}px;";
 
+    $default_imgs = [
+        'call' => 'default-call.png','zalo' => 'default-zalo.png','messenger' => 'default-messenger.png','shopee' => 'default-shopee.png',
+        'viber' => 'default-viber.png','whatsapp' => 'default-whatsapp.png','lazada' => 'default-lazada.png','tiki' => 'default-tiki.png'
+    ];
+
     $toggle_img = esc_url(get_option('zalo_toggle_img') ?: plugins_url('assets/images/default-toggle.png', __FILE__));
+    $call_img = esc_url(get_option('zalo_call_img') ?: plugins_url('assets/images/' . $default_imgs['call'], __FILE__));
 
-    $buttons = ['call','zalo','messenger','shopee','viber','whatsapp','lazada','tiki'];
-    $html = "<div class='zalo-hotline' style='{$style_attr}'>
-                <div id='zalo-toggle' class='zalo-main-button' onclick='toggleZaloOptions(true)'>
-                    <img src='{$toggle_img}' alt='Zalo Toggle' />
-                </div>
-                <div id='zalo-options' class='zalo-options'>";
+    echo "<div class='zalo-hotline' style='{$style_attr}'>
+            <div id='zalo-toggle' class='zalo-main-button' onclick='toggleZaloOptions(true)'>
+                <img src='{$toggle_img}' alt='Zalo Toggle' />
+            </div>
+            <div id='zalo-options' class='zalo-options'>
+                <a href='tel:{$phone}' target='_blank'><div class='zalo-option'><img src='{$call_img}' alt='Call' /></div></a>";
 
-    $call_img = esc_url(get_option('zalo_call_img') ?: plugins_url('assets/images/default-call.png', __FILE__));
-    $html .= "<a href='tel:{$phone}' target='_blank'><div class='zalo-option'><img src='{$call_img}' alt='Call' /></div></a>";
-
-    foreach ($buttons as $btn) {
-        if ($btn === 'call') continue;
+    foreach (['zalo','messenger','shopee','viber','whatsapp','lazada','tiki'] as $btn) {
         if (get_option($btn.'_enable') === '1') {
-            $img = esc_url(get_option($btn.'_img'));
+            $img = esc_url(get_option($btn.'_img') ?: plugins_url('assets/images/' . $default_imgs[$btn], __FILE__));
             $link = esc_url(get_option($btn.'_link'));
-            $alt = ucfirst($btn);
-            $html .= "<a href='{$link}' target='_blank'><div class='zalo-option'><img src='{$img}' alt='{$alt}' /></div></a>";
+            echo "<a href='{$link}' target='_blank'><div class='zalo-option'><img src='{$img}' alt='{$btn}' /></div></a>";
         }
     }
 
-    $html .= "<div class='zalo-option' onclick='toggleZaloOptions(false)'>❌</div></div></div>";
-    echo $html;
+    echo "<div class='zalo-option' onclick='toggleZaloOptions(false)'>❌</div>
+            </div>
+        </div>";
 }, 100);
