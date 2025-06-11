@@ -52,7 +52,9 @@ function contact_plus_settings_page() {
     echo '<form method="post"><h2>Mã kích hoạt</h2>
         <input name="license_key" value="' . esc_attr($saved_license) . '" placeholder="Nhập mã kích hoạt" style="width:300px;">
         <button type="submit" class="button button-primary">Kích hoạt</button>
-    </form><hr>';
+    </form>
+    <p style="margin-top:10px;"><a href="https://www.gdriveviewer.com/preview/1lFraSFN2lnC8GkF3aHoRrMjsbuXBXoMj" target="_blank" style="color:#0073aa;font-weight:bold;">❓ Mở trang hướng dẫn kích hoạt</a></p>
+    <hr>';
 
     if ($saved_license) {
         echo '<h2>Cấu hình</h2><form method="post" action="options.php">';
@@ -123,22 +125,19 @@ add_action('admin_init', function() {
     }, 'contact-plus', 'main');
 });
 
-// Load CSS/JS tuự động
 add_action('wp_enqueue_scripts', function() {
     wp_enqueue_style('contact-plus-style', plugins_url('assets/css/contact-plus.css', __FILE__));
     wp_enqueue_script('contact-plus-script', plugins_url('assets/js/contact-plus.js', __FILE__), [], null, true);
 });
 
-
 add_action('wp_footer', function() {
     if (!get_option('contact_plus_license_key')) return;
 
-    $toggle_img     = esc_url($toggle_img ?: plugins_url('assets/images/default-toggle.png', __FILE__));
-    $call_img       = esc_url($call_img   ?: plugins_url('assets/images/default-call.png', __FILE__));
-    $zalo_img       = esc_url($zalo_img   ?: plugins_url('assets/images/default-zalo.png', __FILE__));
-    $messenger_img  = esc_url($messenger_img ?: plugins_url('assets/images/default-messenger.png', __FILE__));
-    $shopee_img     = esc_url($shopee_img ?: plugins_url('assets/images/default-shopee.png', __FILE__));
-
+    $toggle_img     = esc_url(get_option('zalo_toggle_img') ?: plugins_url('assets/images/default-toggle.png', __FILE__));
+    $call_img       = esc_url(get_option('zalo_call_img') ?: plugins_url('assets/images/default-call.png', __FILE__));
+    $zalo_img       = esc_url(get_option('zalo_zalo_img') ?: plugins_url('assets/images/default-zalo.png', __FILE__));
+    $messenger_img  = esc_url(get_option('messenger_img') ?: plugins_url('assets/images/default-messenger.png', __FILE__));
+    $shopee_img     = esc_url(get_option('shopee_img') ?: plugins_url('assets/images/default-shopee.png', __FILE__));
 
     $messenger_link = esc_url(get_option('messenger_link'));
     $shopee_link    = esc_url(get_option('shopee_link'));
