@@ -139,7 +139,7 @@ add_action('wp_footer', function() {
     $shopee_img     = esc_url($shopee_img ?: plugins_url('assets/default-shopee.png', __FILE__));
 
     $messenger_link = esc_url(get_option('messenger_link'));
-    $shopee_link = esc_url(get_option('shopee_link'));
+    $shopee_link    = esc_url(get_option('shopee_link'));
 
     $phone = esc_attr(get_option('zalo_phone'));
     $side = esc_attr(get_option('zalo_position_side', 'right'));
@@ -151,14 +151,73 @@ add_action('wp_footer', function() {
 
     echo <<<HTML
 <style>
-.zalo-hotline {position:fixed;{$side}:12px;bottom:{$bottom}px;z-index:9999;display:flex;flex-direction:column-reverse;align-items:center;}
-.zalo-main-button img {width:64px;height:64px;border-radius:50%;box-shadow:0 8px 20px rgba(0,0,0,.25);cursor:pointer;transition:transform .3s;}
-.zalo-main-button img:hover {transform:scale(1.1);}
-.zalo-options {display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:12px;opacity:0;transform:translateY(20px);transition:all .3s ease;pointer-events:none;}
-.zalo-options.active {opacity:1;transform:translateY(0);pointer-events:auto;}
-.zalo-option {width:52px;height:52px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(0,0,0,.2);cursor:pointer;transition:transform .25s ease,background .25s;}
-.zalo-option:hover {transform:scale(1.1);background:#f2f2f2;}
-.zalo-option img {width:28px;height:28px;object-fit:contain;}
+.zalo-hotline {
+    position: fixed;
+    {$side}: 12px;
+    bottom: {$bottom}px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    animation: fadeInUp 0.5s ease;
+}
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.zalo-main-button img {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    box-shadow: 0 8px 20px rgba(0,0,0,.25);
+    cursor: pointer;
+    transition: transform .3s, box-shadow .3s;
+}
+.zalo-main-button img:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+}
+.zalo-options {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all .3s ease;
+    pointer-events: none;
+}
+.zalo-options.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+.zalo-option {
+    width: 52px;
+    height: 52px;
+    background: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 16px rgba(0,0,0,.2);
+    cursor: pointer;
+    transition: transform .25s ease, background .25s;
+}
+.zalo-option:hover {
+    transform: scale(1.1);
+    background: #f2f2f2;
+}
+.zalo-option img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    transition: transform 0.3s;
+}
+.zalo-option img:hover {
+    transform: rotate(10deg);
+}
 </style>
 <div class="zalo-hotline">
   <div id="zalo-toggle" class="zalo-main-button" onclick="toggleZaloOptions(true)">
