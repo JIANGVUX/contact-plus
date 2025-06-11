@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Contact Plus
  * Description: Plugin hiển thị nút liên hệ nổi có tùy chỉnh thiết lập
- * Version: 2.2.3
+ * Version: 2.3.1
  * Author: JiangVux
  */
 
@@ -75,6 +75,10 @@ add_action('admin_init', function() {
         'zalo_enable','messenger_enable','shopee_enable',
         'zalo_toggle_img','zalo_phone','zalo_call_img','zalo_zalo_img','messenger_img','shopee_img',
         'messenger_link','shopee_link',
+        'viber_enable','viber_img','viber_link',
+        'whatsapp_enable','whatsapp_img','whatsapp_link',
+        'lazada_enable','lazada_img','lazada_link',
+        'tiki_enable','tiki_img','tiki_link',
         'zalo_position_side','zalo_position_offset'
     ];
     foreach ($fields as $field) {
@@ -83,31 +87,18 @@ add_action('admin_init', function() {
 
     add_settings_section('main', 'Cấu hình hiển thị', null, 'contact-plus');
 
-    add_settings_field('zalo_enable', 'Bật Zalo', function() {
-        echo '<input type="checkbox" name="zalo_enable" value="1" ' . checked(get_option('zalo_enable'), '1', false) . '> Hiển thị Zalo';
-    }, 'contact-plus', 'main');
+    $bool_fields = ['zalo','messenger','shopee','viber','whatsapp','lazada','tiki'];
+    foreach ($bool_fields as $key) {
+        add_settings_field($key.'_enable', "Bật $key", function() use ($key) {
+            echo '<input type="checkbox" name="'.$key.'_enable" value="1" ' . checked(get_option($key.'_enable'), '1', false) . '> Hiển thị '.ucfirst($key);
+        }, 'contact-plus', 'main');
 
-    add_settings_field('messenger_enable', 'Bật Messenger', function() {
-        echo '<input type="checkbox" name="messenger_enable" value="1" ' . checked(get_option('messenger_enable'), '1', false) . '> Hiển thị Messenger';
-    }, 'contact-plus', 'main');
+        add_settings_field($key.'_img', "Ảnh $key", function() use ($key) {
+            echo '<input type="text" name="'.$key.'_img" value="' . esc_attr(get_option($key.'_img')) . '" size="60">';
+        }, 'contact-plus', 'main');
 
-    add_settings_field('shopee_enable', 'Bật Shopee', function() {
-        echo '<input type="checkbox" name="shopee_enable" value="1" ' . checked(get_option('shopee_enable'), '1', false) . '> Hiển thị Shopee';
-    }, 'contact-plus', 'main');
-
-    $fields_img = [
-        'zalo_toggle_img' => 'Ảnh nút chính',
-        'zalo_call_img' => 'Ảnh gọi',
-        'zalo_zalo_img' => 'Ảnh Zalo',
-        'messenger_img' => 'Ảnh Messenger',
-        'shopee_img' => 'Ảnh Shopee',
-        'messenger_link' => 'Link Messenger',
-        'shopee_link' => 'Link Shopee'
-    ];
-
-    foreach ($fields_img as $key => $label) {
-        add_settings_field($key, $label, function() use ($key) {
-            echo '<input type="text" name="' . $key . '" value="' . esc_attr(get_option($key)) . '" size="60">';
+        add_settings_field($key.'_link', "Link $key", function() use ($key) {
+            echo '<input type="text" name="'.$key.'_link" value="' . esc_attr(get_option($key.'_link')) . '" size="60">';
         }, 'contact-plus', 'main');
     }
 
@@ -136,58 +127,35 @@ add_action('wp_enqueue_scripts', function() {
 add_action('wp_footer', function() {
     if (!get_option('contact_plus_license_key')) return;
 
-    $toggle_img     = esc_url(get_option('zalo_toggle_img') ?: plugins_url('assets/images/default-toggle.png', __FILE__));
-    $call_img       = esc_url(get_option('zalo_call_img') ?: plugins_url('assets/images/default-call.png', __FILE__));
-    $zalo_img       = esc_url(get_option('zalo_zalo_img') ?: plugins_url('assets/images/default-zalo.png', __FILE__));
-    $messenger_img  = esc_url(get_option('messenger_img') ?: plugins_url('assets/images/default-messenger.png', __FILE__));
-    $shopee_img     = esc_url(get_option('shopee_img') ?: plugins_url('assets/images/default-shopee.png', __FILE__));
-
-    $messenger_link = esc_url(get_option('messenger_link'));
-    $shopee_link    = esc_url(get_option('shopee_link'));
-
     $phone = esc_attr(get_option('zalo_phone'));
     $side = esc_attr(get_option('zalo_position_side', 'right'));
     $bottom = intval(get_option('zalo_position_offset', 90));
 
-    $show_zalo = get_option('zalo_enable') === '1';
-    $show_mess = get_option('messenger_enable') === '1';
-    $show_shop = get_option('shopee_enable') === '1';
-
-    $position_css = $side === 'left'
-    ? 'left:12px; right:auto;'
-    : 'right:12px; left:auto;';
-
+    $position_css = $side === 'left' ? 'left:12px;right:auto;' : 'right:12px;left:auto;';
     $style_attr = $position_css . " bottom:{$bottom}px;";
 
-    echo "<div class='zalo-hotline' style='{$style_attr}'>
-            <div id='zalo-toggle' class='zalo-main-button' onclick='toggleZaloOptions(true)'>
-                <img src='{$toggle_img}' alt='Zalo Toggle' />
-            </div>
-            <div id='zalo-options' class='zalo-options'>";
+    $toggle_img = esc_url(get_option('zalo_toggle_img') ?: plugins_url('assets/images/default-toggle.png', __FILE__));
 
-    // Nút gọi luôn hiển thị
-    echo "<a href='tel:{$phone}' target='_blank'>
-            <div class='zalo-option'><img src='{$call_img}' alt='Call' /></div>
-        </a>";
+    $buttons = ['call','zalo','messenger','shopee','viber','whatsapp','lazada','tiki'];
+    $html = "<div class='zalo-hotline' style='{$style_attr}'>
+                <div id='zalo-toggle' class='zalo-main-button' onclick='toggleZaloOptions(true)'>
+                    <img src='{$toggle_img}' alt='Zalo Toggle' />
+                </div>
+                <div id='zalo-options' class='zalo-options'>";
 
-    if ($show_zalo) {
-        echo "<a href='https://zalo.me/{$phone}' target='_blank'>
-                <div class='zalo-option'><img src='{$zalo_img}' alt='Zalo' /></div>
-            </a>";
-    }
-    if ($show_mess) {
-        echo "<a href='{$messenger_link}' target='_blank'>
-                <div class='zalo-option'><img src='{$messenger_img}' alt='Messenger' /></div>
-            </a>";
-    }
-    if ($show_shop) {
-        echo "<a href='{$shopee_link}' target='_blank'>
-                <div class='zalo-option'><img src='{$shopee_img}' alt='Shopee' /></div>
-            </a>";
+    $call_img = esc_url(get_option('zalo_call_img') ?: plugins_url('assets/images/default-call.png', __FILE__));
+    $html .= "<a href='tel:{$phone}' target='_blank'><div class='zalo-option'><img src='{$call_img}' alt='Call' /></div></a>";
+
+    foreach ($buttons as $btn) {
+        if ($btn === 'call') continue;
+        if (get_option($btn.'_enable') === '1') {
+            $img = esc_url(get_option($btn.'_img'));
+            $link = esc_url(get_option($btn.'_link'));
+            $alt = ucfirst($btn);
+            $html .= "<a href='{$link}' target='_blank'><div class='zalo-option'><img src='{$img}' alt='{$alt}' /></div></a>";
+        }
     }
 
-    // Nút đóng
-    echo "<div class='zalo-option' onclick='toggleZaloOptions(false)'>❌</div>
-        </div>
-        </div>";
+    $html .= "<div class='zalo-option' onclick='toggleZaloOptions(false)'>❌</div></div></div>";
+    echo $html;
 }, 100);
