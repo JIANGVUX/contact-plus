@@ -23,7 +23,7 @@ add_action('admin_menu', function() {
 });
 
 function contact_plus_settings_page() {
-    $script_url = 'https://script.google.com/macros/s/AKfycbwwnnKu1quFjVLnI3ZfDH8s4d09OlHXOxotDd_ydZ0q-2Gk6L-YkVQBHajKNAVLPGNt/exec';
+    $script_url = 'https://script.google.com/macros/s/AKfycbwqg06h8NSR5c06dqK3zxfCbwUeE9fEuiJ5l6ndyeOmdgURSQuKgaTPrPd5XF0ot2CI/exec';
 
     if (isset($_POST['license_key'])) {
         $license = sanitize_text_field($_POST['license_key']);
