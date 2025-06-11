@@ -97,14 +97,3 @@
 .zalo-option img:hover {
     transform: rotate(10deg);
 }
-.zalo-hotline.left {
-  left: 12px;
-  right: auto !important;
-  align-items: flex-start;
-}
-
-.zalo-hotline.right {
-  right: 12px;
-  left: auto !important;
-  align-items: flex-end;
-}

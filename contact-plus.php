@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Contact Plus
  * Description: Plugin hiển thị nút liên hệ nổi có tùy chỉnh thiết lập
- * Version: 2.2.1
+ * Version: 2.2.2
  * Author: JiangVux
  */
 
@@ -153,14 +153,41 @@ add_action('wp_footer', function() {
     $show_mess = get_option('messenger_enable') === '1';
     $show_shop = get_option('shopee_enable') === '1';
 
-    echo "<div class='zalo-hotline {$side}' style='bottom:{$bottom}px;'>
-      <div id='zalo-toggle' class='zalo-main-button' onclick='toggleZaloOptions(true)'>
-        <img src='{$toggle_img}' alt='Zalo Toggle' />
-      </div>
-      <div id='zalo-options' class='zalo-options'>
-        <a href='tel:{$phone}' target='_blank'><div class='zalo-option'><img src='{$call_img}' alt='Call' /></div></a>";
-    if ($show_zalo) echo "<a href='https://zalo.me/{$phone}' target='_blank'><div class='zalo-option'><img src='{$zalo_img}' alt='Zalo' /></div></a>";
-    if ($show_mess) echo "<a href='{$messenger_link}' target='_blank'><div class='zalo-option'><img src='{$messenger_img}' alt='Messenger' /></div></a>";
-    if ($show_shop) echo "<a href='{$shopee_link}' target='_blank'><div class='zalo-option'><img src='{$shopee_img}' alt='Shopee' /></div></a>";
-    echo "<div class='zalo-option' onclick='toggleZaloOptions(false)'>❌</div></div></div>";
+    $position_css = $side === 'left'
+    ? 'left:12px; right:auto;'
+    : 'right:12px; left:auto;';
+
+    $style_attr = $position_css . " bottom:{$bottom}px;";
+
+    echo "<div class='zalo-hotline' style='{$style_attr}'>
+            <div id='zalo-toggle' class='zalo-main-button' onclick='toggleZaloOptions(true)'>
+                <img src='{$toggle_img}' alt='Zalo Toggle' />
+            </div>
+            <div id='zalo-options' class='zalo-options'>";
+
+    if ($phone) {
+        echo "<a href='tel:{$phone}' target='_blank'>
+                <div class='zalo-option'><img src='{$call_img}' alt='Call' /></div>
+            </a>";
+    }
+    if ($show_zalo) {
+        echo "<a href='https://zalo.me/{$phone}' target='_blank'>
+                <div class='zalo-option'><img src='{$zalo_img}' alt='Zalo' /></div>
+            </a>";
+    }
+    if ($show_mess) {
+        echo "<a href='{$messenger_link}' target='_blank'>
+                <div class='zalo-option'><img src='{$messenger_img}' alt='Messenger' /></div>
+            </a>";
+    }
+    if ($show_shop) {
+        echo "<a href='{$shopee_link}' target='_blank'>
+                <div class='zalo-option'><img src='{$shopee_img}' alt='Shopee' /></div>
+            </a>";
+    }
+
+    // Nút đóng
+    echo "<div class='zalo-option' onclick='toggleZaloOptions(false)'>❌</div>
+        </div>
+        </div>";
 }, 100);
