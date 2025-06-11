@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Contact Plus
  * Description: Plugin hiển thị nút liên hệ nổi có tùy chỉnh thiết lập
- * Version: 2.2.2
+ * Version: 2.2.3
  * Author: JiangVux
  */
 
@@ -165,11 +165,11 @@ add_action('wp_footer', function() {
             </div>
             <div id='zalo-options' class='zalo-options'>";
 
-    if ($phone) {
-        echo "<a href='tel:{$phone}' target='_blank'>
-                <div class='zalo-option'><img src='{$call_img}' alt='Call' /></div>
-            </a>";
-    }
+    // Nút gọi luôn hiển thị
+    echo "<a href='tel:{$phone}' target='_blank'>
+            <div class='zalo-option'><img src='{$call_img}' alt='Call' /></div>
+        </a>";
+
     if ($show_zalo) {
         echo "<a href='https://zalo.me/{$phone}' target='_blank'>
                 <div class='zalo-option'><img src='{$zalo_img}' alt='Zalo' /></div>
