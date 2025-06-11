@@ -218,6 +218,44 @@ add_action('wp_footer', function() {
 .zalo-option img:hover {
     transform: rotate(10deg);
 }
+.zalo-main-button {
+    position: relative;
+}
+
+.zalo-main-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 136, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+    animation: wave-pulse 2.5s ease-out infinite;
+}
+
+@keyframes wave-pulse {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.5;
+    }
+    70% {
+        transform: translate(-50%, -50%) scale(1.6);
+        opacity: 0.2;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2.1);
+        opacity: 0;
+    }
+}
+
+.zalo-main-button img {
+    position: relative;
+    z-index: 1;
+}
+
 </style>
 <div class="zalo-hotline">
   <div id="zalo-toggle" class="zalo-main-button" onclick="toggleZaloOptions(true)">
