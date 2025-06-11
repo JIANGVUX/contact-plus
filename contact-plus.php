@@ -19,12 +19,10 @@ $updateChecker = PucFactory::buildUpdateChecker(
     'contact-plus'
 );
 
-// === Thêm menu vào admin ===
 add_action('admin_menu', function() {
     add_menu_page('Liên Hệ', 'Liên Hệ', 'manage_options', 'contact-plus', 'contact_plus_settings_page');
 });
 
-// === Trang thiết lập plugin ===
 function contact_plus_settings_page() {
     $script_url = 'https://script.google.com/macros/s/AKfycbxJPjsXB5p2MY1tiG-bQWekyFQOv6R-IB74FwV2RsE9AWzjTnLYLcM2ttOF7YacFWnK/exec';
 
@@ -68,11 +66,11 @@ function contact_plus_settings_page() {
     echo '</div>';
 }
 
-// === Đăng ký cấu hình ===
 add_action('admin_init', function() {
     $fields = [
         'zalo_enable','messenger_enable','shopee_enable',
         'zalo_toggle_img','zalo_phone','zalo_call_img','zalo_zalo_img','messenger_img','shopee_img',
+        'messenger_link','shopee_link',
         'zalo_position_side','zalo_position_offset'
     ];
     foreach ($fields as $field) {
@@ -98,7 +96,9 @@ add_action('admin_init', function() {
         'zalo_call_img' => 'Ảnh gọi',
         'zalo_zalo_img' => 'Ảnh Zalo',
         'messenger_img' => 'Ảnh Messenger',
-        'shopee_img' => 'Ảnh Shopee'
+        'shopee_img' => 'Ảnh Shopee',
+        'messenger_link' => 'Link Messenger',
+        'shopee_link' => 'Link Shopee'
     ];
 
     foreach ($fields_img as $key => $label) {
@@ -124,7 +124,6 @@ add_action('admin_init', function() {
     }, 'contact-plus', 'main');
 });
 
-// === Hiển thị nút liên hệ ===
 add_action('wp_footer', function() {
     if (!get_option('contact_plus_license_key')) return;
 
@@ -133,6 +132,8 @@ add_action('wp_footer', function() {
     $zalo_img = esc_url(get_option('zalo_zalo_img'));
     $messenger_img = esc_url(get_option('messenger_img'));
     $shopee_img = esc_url(get_option('shopee_img'));
+    $messenger_link = esc_url(get_option('messenger_link'));
+    $shopee_link = esc_url(get_option('shopee_link'));
 
     $phone = esc_attr(get_option('zalo_phone'));
     $side = esc_attr(get_option('zalo_position_side', 'right'));
@@ -161,8 +162,8 @@ add_action('wp_footer', function() {
     <a href="tel:{$phone}" target="_blank"><div class="zalo-option"><img src="{$call_img}" alt="Call" /></div></a>
 HTML;
     if ($show_zalo) echo "<a href=\"https://zalo.me/{$phone}\" target=\"_blank\"><div class='zalo-option'><img src='{$zalo_img}' alt='Zalo' /></div></a>";
-    if ($show_mess) echo "<a href=\"https://m.me/{$phone}\" target=\"_blank\"><div class='zalo-option'><img src='{$messenger_img}' alt='Messenger' /></div></a>";
-    if ($show_shop) echo "<a href=\"https://shopee.vn/{$phone}\" target=\"_blank\"><div class='zalo-option'><img src='{$shopee_img}' alt='Shopee' /></div></a>";
+    if ($show_mess) echo "<a href=\"{$messenger_link}\" target=\"_blank\"><div class='zalo-option'><img src='{$messenger_img}' alt='Messenger' /></div></a>";
+    if ($show_shop) echo "<a href=\"{$shopee_link}\" target=\"_blank\"><div class='zalo-option'><img src='{$shopee_img}' alt='Shopee' /></div></a>";
     echo <<<HTML
     <div class="zalo-option" onclick="toggleZaloOptions(false)">❌</div>
   </div>
