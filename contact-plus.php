@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Contact Plus
  * Description: Plugin hiển thị nút liên hệ nổi có tùy chỉnh thiết lập
- * Version: 2.1.9
+ * Version: 2.2.0
  * Author: JiangVux
  */
 
@@ -153,7 +153,7 @@ add_action('wp_footer', function() {
     $show_mess = get_option('messenger_enable') === '1';
     $show_shop = get_option('shopee_enable') === '1';
 
-    echo "<div class='zalo-hotline' style='{$side}:12px;bottom:{$bottom}px;'>
+    echo "<div class='zalo-hotline {$side}' style='bottom:{$bottom}px;'>
       <div id='zalo-toggle' class='zalo-main-button' onclick='toggleZaloOptions(true)'>
         <img src='{$toggle_img}' alt='Zalo Toggle' />
       </div>
