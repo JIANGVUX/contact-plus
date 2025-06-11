@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Contact Plus
  * Description: Plugin hiển thị nút liên hệ nổi có tùy chỉnh thiết lập
- * Version: 2.1.6
+ * Version: 2.1.8
  * Author: JiangVux
  */
 
@@ -123,20 +123,22 @@ add_action('admin_init', function() {
     }, 'contact-plus', 'main');
 });
 
+// Load CSS/JS tuự động
+add_action('wp_enqueue_scripts', function() {
+    wp_enqueue_style('contact-plus-style', plugins_url('assets/css/contact-plus.css', __FILE__));
+    wp_enqueue_script('contact-plus-script', plugins_url('assets/js/contact-plus.js', __FILE__), [], null, true);
+});
+
+
 add_action('wp_footer', function() {
     if (!get_option('contact_plus_license_key')) return;
 
-    $toggle_img     = get_option('zalo_toggle_img');
-    $call_img       = get_option('zalo_call_img');
-    $zalo_img       = get_option('zalo_zalo_img');
-    $messenger_img  = get_option('messenger_img');
-    $shopee_img     = get_option('shopee_img');
+    $toggle_img     = esc_url($toggle_img ?: plugins_url('assets/images/default-toggle.png', __FILE__));
+    $call_img       = esc_url($call_img   ?: plugins_url('assets/images/default-call.png', __FILE__));
+    $zalo_img       = esc_url($zalo_img   ?: plugins_url('assets/images/default-zalo.png', __FILE__));
+    $messenger_img  = esc_url($messenger_img ?: plugins_url('assets/images/default-messenger.png', __FILE__));
+    $shopee_img     = esc_url($shopee_img ?: plugins_url('assets/images/default-shopee.png', __FILE__));
 
-    $toggle_img     = esc_url($toggle_img ?: plugins_url('assets/default-toggle.png', __FILE__));
-    $call_img       = esc_url($call_img   ?: plugins_url('assets/default-call.png', __FILE__));
-    $zalo_img       = esc_url($zalo_img   ?: plugins_url('assets/default-zalo.png', __FILE__));
-    $messenger_img  = esc_url($messenger_img ?: plugins_url('assets/default-messenger.png', __FILE__));
-    $shopee_img     = esc_url($shopee_img ?: plugins_url('assets/default-shopee.png', __FILE__));
 
     $messenger_link = esc_url(get_option('messenger_link'));
     $shopee_link    = esc_url(get_option('shopee_link'));
@@ -149,133 +151,14 @@ add_action('wp_footer', function() {
     $show_mess = get_option('messenger_enable') === '1';
     $show_shop = get_option('shopee_enable') === '1';
 
-    echo <<<HTML
-<style>
-.zalo-hotline {
-    position: fixed;
-    {$side}: 12px;
-    bottom: {$bottom}px;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column-reverse;
-    align-items: center;
-    animation: fadeInUp 0.5s ease;
-}
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(40px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-.zalo-main-button img {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    box-shadow: 0 8px 20px rgba(0,0,0,.25);
-    cursor: pointer;
-    transition: transform .3s, box-shadow .3s;
-}
-.zalo-main-button img:hover {
-    transform: scale(1.1);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.3);
-}
-.zalo-options {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 12px;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: all .3s ease;
-    pointer-events: none;
-}
-.zalo-options.active {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-}
-.zalo-option {
-    width: 52px;
-    height: 52px;
-    background: #fff;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 6px 16px rgba(0,0,0,.2);
-    cursor: pointer;
-    transition: transform .25s ease, background .25s;
-}
-.zalo-option:hover {
-    transform: scale(1.1);
-    background: #f2f2f2;
-}
-.zalo-option img {
-    width: 28px;
-    height: 28px;
-    object-fit: contain;
-    transition: transform 0.3s;
-}
-.zalo-option img:hover {
-    transform: rotate(10deg);
-}
-.zalo-main-button {
-    position: relative;
-}
-
-.zalo-main-button::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 136, 255, 0.2);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 0;
-    animation: wave-pulse 2.5s ease-out infinite;
-}
-
-@keyframes wave-pulse {
-    0% {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 0.5;
-    }
-    70% {
-        transform: translate(-50%, -50%) scale(1.6);
-        opacity: 0.2;
-    }
-    100% {
-        transform: translate(-50%, -50%) scale(2.1);
-        opacity: 0;
-    }
-}
-
-.zalo-main-button img {
-    position: relative;
-    z-index: 1;
-}
-
-</style>
-<div class="zalo-hotline">
-  <div id="zalo-toggle" class="zalo-main-button" onclick="toggleZaloOptions(true)">
-    <img src="{$toggle_img}" alt="Zalo Toggle" />
-  </div>
-  <div id="zalo-options" class="zalo-options">
-    <a href="tel:{$phone}" target="_blank"><div class="zalo-option"><img src="{$call_img}" alt="Call" /></div></a>
-HTML;
-    if ($show_zalo) echo "<a href=\"https://zalo.me/{$phone}\" target=\"_blank\"><div class='zalo-option'><img src='{$zalo_img}' alt='Zalo' /></div></a>";
-    if ($show_mess) echo "<a href=\"{$messenger_link}\" target=\"_blank\"><div class='zalo-option'><img src='{$messenger_img}' alt='Messenger' /></div></a>";
-    if ($show_shop) echo "<a href=\"{$shopee_link}\" target=\"_blank\"><div class='zalo-option'><img src='{$shopee_img}' alt='Shopee' /></div></a>";
-    echo <<<HTML
-    <div class="zalo-option" onclick="toggleZaloOptions(false)">❌</div>
-  </div>
-</div>
-<script>
-function toggleZaloOptions(show) {
-    document.getElementById('zalo-options').classList.toggle('active', show);
-    document.getElementById('zalo-toggle').style.display = show ? 'none' : 'block';
-}
-</script>
-HTML;
+    echo "<div class='zalo-hotline' style='{$side}:12px;bottom:{$bottom}px;'>
+      <div id='zalo-toggle' class='zalo-main-button' onclick='toggleZaloOptions(true)'>
+        <img src='{$toggle_img}' alt='Zalo Toggle' />
+      </div>
+      <div id='zalo-options' class='zalo-options'>
+        <a href='tel:{$phone}' target='_blank'><div class='zalo-option'><img src='{$call_img}' alt='Call' /></div></a>";
+    if ($show_zalo) echo "<a href='https://zalo.me/{$phone}' target='_blank'><div class='zalo-option'><img src='{$zalo_img}' alt='Zalo' /></div></a>";
+    if ($show_mess) echo "<a href='{$messenger_link}' target='_blank'><div class='zalo-option'><img src='{$messenger_img}' alt='Messenger' /></div></a>";
+    if ($show_shop) echo "<a href='{$shopee_link}' target='_blank'><div class='zalo-option'><img src='{$shopee_img}' alt='Shopee' /></div></a>";
+    echo "<div class='zalo-option' onclick='toggleZaloOptions(false)'>❌</div></div></div>";
 }, 100);
