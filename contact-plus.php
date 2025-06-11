@@ -52,9 +52,12 @@ function contact_plus_settings_page() {
     echo '<form method="post"><h2>Mã kích hoạt</h2>
         <input name="license_key" value="' . esc_attr($saved_license) . '" placeholder="Nhập mã kích hoạt" style="width:300px;">
         <button type="submit" class="button button-primary">Kích hoạt</button>
-    </form>
-    <p style="margin-top:10px;"><a href="https://www.gdriveviewer.com/preview/1lFraSFN2lnC8GkF3aHoRrMjsbuXBXoMj" target="_blank" style="color:#0073aa;font-weight:bold;">❓ Mở trang hướng dẫn kích hoạt</a></p>
-    <hr>';
+        <div style="margin-top:12px;">
+          <a href="https://jiangvux.weebly.com/" target="_blank" style="color:#0073aa; font-weight: 600; text-decoration: none;">
+            🔗 Hướng dẫn lấy mã kích hoạt tại đây
+          </a>
+        </div>
+    </form><hr>';
 
     if ($saved_license) {
         echo '<h2>Cấu hình</h2><form method="post" action="options.php">';
