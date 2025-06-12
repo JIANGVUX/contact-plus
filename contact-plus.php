@@ -23,24 +23,32 @@ add_action('admin_menu', function() {
 });
 
 function contact_plus_settings_page() {
-    $script_url = 'https://script.google.com/macros/s/AKfycbzwSjU9kxflYcCgePIhYUWiae5hA3ZOT7z6h5MEyJ-lwERtMSybIoEyMNrWRmnjPsRO/exec';
+    $script_url = 'https://script.google.com/macros/s/AKfycbwIkKkS22hrv9ZCFRQAsa4lUVtrOrmwqyVccDzqfF2vozXYbArhEFthvZkfOOkH0tBc/exec';
 
     if (isset($_POST['license_key'])) {
-        $license = sanitize_text_field($_POST['license_key']);
-        $domain = $_SERVER['HTTP_HOST'];
-        $response = wp_remote_get($script_url . '?license=' . urlencode($license) . '&domain=' . urlencode($domain));
-        $body = !is_wp_error($response) ? wp_remote_retrieve_body($response) : '';
+    $license = sanitize_text_field($_POST['license_key']);
+    $domain = $_SERVER['HTTP_HOST'];
 
-        if ($body === 'VALID') {
-            update_option('contact_plus_license_key', $license);
-            wp_safe_redirect(admin_url('admin.php?page=contact-plus&activated=1'));
-            exit;
-        } else {
-            add_action('admin_notices', function() {
-                echo "<div class='notice notice-error is-dismissible'><p>Kích hoạt không thành công. Mã không hợp lệ hoặc bị từ chối.</p></div>";
-            });
-        }
+    // Tạo URL kiểm tra license
+    $full_url = $script_url . '?license=' . urlencode($license) . '&domain=' . urlencode($domain);
+
+    // 👉 Ghi log URL vào debug.log
+    error_log('[Contact Plus] License check URL: ' . $full_url);
+
+    $response = wp_remote_get($full_url);
+    $body = !is_wp_error($response) ? wp_remote_retrieve_body($response) : '';
+
+    if ($body === 'VALID') {
+        update_option('contact_plus_license_key', $license);
+        wp_safe_redirect(admin_url('admin.php?page=contact-plus&activated=1'));
+        exit;
+    } else {
+        add_action('admin_notices', function() {
+            echo "<div class='notice notice-error is-dismissible'><p>Kích hoạt không thành công. Mã không hợp lệ hoặc bị từ chối.</p></div>";
+        });
     }
+}
+
 
     echo '<div class="wrap"><h1>Thiết lập Liên Hệ</h1>';
 
