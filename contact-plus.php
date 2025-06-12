@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Contact Plus
  * Description: Plugin hiển thị nút liên hệ nổi có tùy chỉnh thiết lập
- * Version: 2.3.9
+ * Version: 2.4.0
  * Author: JiangVux
  */
 
@@ -62,7 +62,7 @@ function contact_plus_settings_page() {
         <button type="submit" class="button button-primary">Kích hoạt</button>
         <div style="margin-top:12px;">
         <div style="margin-top:12px; color:#0073aa; font-weight:600;">
-            🔗 Trang: Jiangvux.weebly.com
+        Hướng dẫn lấy mã kích hoạt tại: Jiangvux.weebly.com
         </div>
         </div>
     </form><hr>';
