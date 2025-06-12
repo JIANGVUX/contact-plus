@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Contact Plus
  * Description: Plugin hiển thị nút liên hệ nổi có tùy chỉnh thiết lập
- * Version: 2.3.4
+ * Version: 2.3.5
  * Author: JiangVux
  */
 
@@ -23,7 +23,7 @@ add_action('admin_menu', function() {
 });
 
 function contact_plus_settings_page() {
-    $script_url = 'https://script.google.com/macros/s/AKfycbyKh3vdXEA4t2yhs_X4iko94mvmrBJZlzm3MBV3Vz2wWN0XNZCNit_o02gJKgb-Iv37/exec';
+    $script_url = 'https://script.google.com/macros/s/AKfycbzXSPbPUlb4tskIUEJiJ2YqTu21U29TgH0ZgPPhXftYEBJnlRzZ5uyOwzym3oCNfog/exec';
 
     if (isset($_POST['license_key'])) {
         $license = sanitize_text_field($_POST['license_key']);
