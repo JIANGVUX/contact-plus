@@ -80,13 +80,13 @@ function contact_plus_settings_page() {
     echo '</div>';
 }
 
-
 add_action('admin_init', function() {
     $fields = [
         'zalo_enable','messenger_enable','shopee_enable','viber_enable','whatsapp_enable','lazada_enable','tiki_enable',
-        'zalo_toggle_img','zalo_phone','zalo_call_img','zalo_zalo_img','messenger_img','shopee_img','viber_img','whatsapp_img','lazada_img','tiki_img',
+        'zalo_toggle_img','zalo_call_img','zalo_zalo_img',
+        'messenger_img','shopee_img','viber_img','whatsapp_img','lazada_img','tiki_img',
         'zalo_link','messenger_link','shopee_link','viber_link','whatsapp_link','lazada_link','tiki_link',
-        'zalo_position_side','zalo_position_offset'
+        'zalo_position_side','zalo_position_offset','zalo_phone'
     ];
     foreach ($fields as $field) {
         register_setting('contact_plus_settings', $field);
@@ -141,77 +141,3 @@ add_action('admin_init', function() {
         echo '<input type="number" name="zalo_position_offset" value="' . esc_attr(get_option('zalo_position_offset', 90)) . '" min="0">';
     }, 'contact-plus', 'main');
 });
-
-add_action('admin_enqueue_scripts', function($hook) {
-    if ($hook !== 'toplevel_page_contact-plus') return;
-
-    wp_enqueue_media();
-    wp_add_inline_script('jquery-core', "
-        jQuery(document).ready(function($){
-            $('.select-media').click(function(e){
-                e.preventDefault();
-                let target = $(this).data('target');
-                const frame = wp.media({
-                    title: 'Chọn ảnh',
-                    button: { text: 'Chọn ảnh này' },
-                    multiple: false
-                });
-                frame.on('select', function(){
-                    const url = frame.state().get('selection').first().toJSON().url;
-                    $('#' + target).val(url);
-                });
-                frame.open();
-            });
-        });
-    ");
-});
-
-add_action('wp_enqueue_scripts', function() {
-    wp_enqueue_style('contact-plus-style', plugins_url('assets/css/contact-plus.css', __FILE__));
-    wp_enqueue_script('contact-plus-script', plugins_url('assets/js/contact-plus.js', __FILE__), [], null, true);
-});
-
-add_action('wp_footer', function() {
-    if (!get_option('contact_plus_license_key')) return;
-
-    $phone = esc_attr(get_option('zalo_phone'));
-    $side = esc_attr(get_option('zalo_position_side', 'right'));
-    $bottom = intval(get_option('zalo_position_offset', 90));
-    $position_css = $side === 'left' ? 'left:12px;right:auto;' : 'right:12px;left:auto;';
-    $style_attr = $position_css . " bottom:{$bottom}px;";
-
-    $default_imgs = [
-        'call' => 'default-call.png','zalo' => 'default-zalo.png','messenger' => 'default-messenger.png','shopee' => 'default-shopee.png',
-        'viber' => 'default-viber.png','whatsapp' => 'default-whatsapp.png','lazada' => 'default-lazada.png','tiki' => 'default-tiki.png'
-    ];
-
-    $toggle_img = esc_url(get_option('zalo_toggle_img') ?: plugins_url('assets/images/default-toggle.png', __FILE__));
-    $call_img = esc_url(get_option('zalo_call_img') ?: plugins_url('assets/images/' . $default_imgs['call'], __FILE__));
-
-    echo "<div class='zalo-hotline' style='{$style_attr}'>
-            <div id='zalo-toggle' class='zalo-main-button' onclick='toggleZaloOptions(true)'>
-                <img src='{$toggle_img}' alt='Zalo Toggle' />
-            </div>
-            <div id='zalo-options' class='zalo-options'>
-                <a href='tel:{$phone}' target='_blank'><div class='zalo-option'><img src='{$call_img}' alt='Call' /></div></a>";
-
-    foreach (['zalo','messenger','shopee','viber','whatsapp','lazada','tiki'] as $btn) {
-        if (get_option($btn.'_enable') === '1') {
-            $img = esc_url(get_option($btn.'_img') ?: plugins_url('assets/images/' . $default_imgs[$btn], __FILE__));
-
-            if ($btn === 'zalo') {
-                $zalo_link = get_option('zalo_link');
-                $phone_raw = preg_replace('/[^0-9]/', '', get_option('zalo_phone'));
-                $link = esc_url($zalo_link ?: "https://zalo.me/{$phone_raw}");
-            } else {
-                $link = esc_url(get_option($btn.'_link'));
-            }
-
-            echo "<a href='{$link}' target='_blank'><div class='zalo-option'><img src='{$img}' alt='{$btn}' /></div></a>";
-        }
-    }
-
-    echo "<div class='zalo-option' onclick='toggleZaloOptions(false)'>❌</div>
-            </div>
-        </div>";
-}, 100);
