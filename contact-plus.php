@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Contact Plus
- * Description: Plugin hiển thị nút liên hệ nổi có tùy chỉnh thiết lập
+ * Description: Plugin hiển thị nút liên hệ nổi có tuý chỉnh thiết lập
  * Version: 2.5.0
  * Author: JiangVux
  */
@@ -39,7 +39,14 @@ function contact_plus_settings_page() {
                 'domain' => $domain,
             ]
         ]);
-        $body = !is_wp_error($response) ? wp_remote_retrieve_body($response) : '';
+
+        if (is_wp_error($response)) {
+            error_log('[Contact Plus] ❌ Kết nối thất bại: ' . $response->get_error_message());
+            wp_safe_redirect(admin_url('admin.php?page=contact-plus&error=connection_failed'));
+            exit;
+        }
+
+        $body = wp_remote_retrieve_body($response);
 
         if ($body === 'VALID') {
             update_option('contact_plus_license_key', $license);
@@ -61,6 +68,10 @@ function contact_plus_settings_page() {
         echo "<div class='notice notice-error is-dismissible'><p>❌ Mã kích hoạt không hợp lệ hoặc bị từ chối.</p></div>";
     }
 
+    if (isset($_GET['error']) && $_GET['error'] === 'connection_failed') {
+        echo "<div class='notice notice-error is-dismissible'><p>❌ Không thể kết nối tới máy chủ xác thực. Vui lòng kiểm tra kết nối mạng hoặc firewall.</p></div>";
+    }
+
     $saved_license = get_option('contact_plus_license_key', '');
     echo '<form method="post"><h2>Mã kích hoạt</h2>';
     wp_nonce_field('contact_plus_verify', 'contact_plus_nonce');
@@ -78,6 +89,7 @@ function contact_plus_settings_page() {
 
     echo '</div>';
 }
+
 
 add_action('admin_init', function() {
     $fields = [
