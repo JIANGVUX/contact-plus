@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Contact Plus
  * Description: Plugin hiển thị nút liên hệ nổi có tuý chỉnh thiết lập
- * Version: 2.5.0
- * Author: JiangVux
+ * Version: 2.5.1
+ * Author: JiangVux (modified)
  */
 
 if (!defined('ABSPATH')) exit;
@@ -26,35 +26,33 @@ function contact_plus_settings_page() {
     $script_url = 'https://script.google.com/macros/s/AKfycbzlNq4fe7RhAhZlSFfRKRopul6W_9fHJFCYH14X7p81zXymkEHzI0xqqSV49IkilLnu/exec';
 
     if (isset($_POST['license_key'])) {
-        if (!isset($_POST['contact_plus_nonce']) || !wp_verify_nonce($_POST['contact_plus_nonce'], 'contact_plus_verify')) {
-            wp_die('❌ Xác thực không hợp lệ!');
-        }
-
         $license = sanitize_text_field($_POST['license_key']);
         $domain = $_SERVER['HTTP_HOST'];
 
-        $response = wp_remote_post($script_url, [
-            'body' => [
-                'license' => $license,
-                'domain' => $domain,
-            ]
-        ]);
+        $full_url = $script_url . '?license=' . urlencode($license) . '&domain=' . urlencode($domain);
+        error_log('[Contact Plus] License check URL: ' . $full_url);
+
+        $response = wp_remote_get($full_url);
 
         if (is_wp_error($response)) {
-            error_log('[Contact Plus] ❌ Kết nối thất bại: ' . $response->get_error_message());
-            wp_safe_redirect(admin_url('admin.php?page=contact-plus&error=connection_failed'));
-            exit;
-        }
+            $error_message = $response->get_error_message();
+            error_log('[Contact Plus] ❌ Lỗi kết nối: ' . $error_message);
 
-        $body = wp_remote_retrieve_body($response);
+            add_action('admin_notices', function() use ($error_message) {
+                echo "<div class='notice notice-error is-dismissible'><p>❌ Kết nối xác minh thất bại: $error_message</p></div>";
+            });
 
-        if ($body === 'VALID') {
-            update_option('contact_plus_license_key', $license);
-            wp_safe_redirect(admin_url('admin.php?page=contact-plus&activated=1'));
-            exit;
         } else {
-            wp_safe_redirect(admin_url('admin.php?page=contact-plus&error=invalid_license'));
-            exit;
+            $body = wp_remote_retrieve_body($response);
+            if ($body === 'VALID') {
+                update_option('contact_plus_license_key', $license);
+                wp_safe_redirect(admin_url('admin.php?page=contact-plus&activated=1'));
+                exit;
+            } else {
+                add_action('admin_notices', function() {
+                    echo "<div class='notice notice-error is-dismissible'><p>❌ Mã kích hoạt không hợp lệ hoặc bị tứ chối.</p></div>";
+                });
+            }
         }
     }
 
@@ -64,20 +62,14 @@ function contact_plus_settings_page() {
         echo "<div class='notice notice-success is-dismissible'><p>✅ Kích hoạt thành công!</p></div>";
     }
 
-    if (isset($_GET['error']) && $_GET['error'] === 'invalid_license') {
-        echo "<div class='notice notice-error is-dismissible'><p>❌ Mã kích hoạt không hợp lệ hoặc bị từ chối.</p></div>";
-    }
-
-    if (isset($_GET['error']) && $_GET['error'] === 'connection_failed') {
-        echo "<div class='notice notice-error is-dismissible'><p>❌ Không thể kết nối tới máy chủ xác thực. Vui lòng kiểm tra kết nối mạng hoặc firewall.</p></div>";
-    }
-
     $saved_license = get_option('contact_plus_license_key', '');
-    echo '<form method="post"><h2>Mã kích hoạt</h2>';
-    wp_nonce_field('contact_plus_verify', 'contact_plus_nonce');
-    echo '<input name="license_key" value="' . esc_attr($saved_license) . '" placeholder="Nhập mã kích hoạt" style="width:300px;">';
-    echo '<button type="submit" class="button button-primary">Kích hoạt</button>';
-    echo '<div style="margin-top:12px; color:#0073aa; font-weight:600;">Hướng dẫn lấy mã kích hoạt tại: Jiangvux.weebly.com</div></form><hr>';
+    echo '<form method="post"><h2>Mã kích hoạt</h2>
+        <input name="license_key" value="' . esc_attr($saved_license) . '" placeholder="Nhập mã kích hoạt" style="width:300px;">
+        <button type="submit" class="button button-primary">Kích hoạt</button>
+        <div style="margin-top:12px; color:#0073aa; font-weight:600;">
+        Hướng dẫn lấy mã kích hoạt tại: Jiangvux.weebly.com
+        </div>
+    </form><hr>';
 
     if ($saved_license) {
         echo '<h2>Cấu hình</h2><form method="post" action="options.php">';
@@ -89,7 +81,6 @@ function contact_plus_settings_page() {
 
     echo '</div>';
 }
-
 
 add_action('admin_init', function() {
     $fields = [
@@ -126,7 +117,7 @@ add_action('admin_init', function() {
         $side = get_option('zalo_position_side', 'right');
         echo '<select name="zalo_position_side">
             <option value="left"' . selected($side, 'left', false) . '>Trái</option>
-            <option value="right"' . selected($side, 'right', false) . '>Phải</option>
+            <option value="right"' . selected($side, 'right', false) . '>Đúc</option>
         </select>';
     }, 'contact-plus', 'main');
 
