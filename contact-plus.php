@@ -26,6 +26,14 @@ function contact_plus_settings_page() {
     $script_url = 'https://script.google.com/macros/s/AKfycbwdkbBHu3AI0ghcoo7MIWTTLizX9f03Ye4dyqcufys3nMyL0JVXZqUsMD2_43V5QmmQ/exec';
 
     if (isset($_POST['license_key'])) {
+        if (!current_user_can('manage_options')) {
+            wp_die('Bạn không có quyền thực hiện thao tác này.');
+        }
+
+        if (!check_admin_referer('contact_plus_activate')) {
+            wp_die('Xác thực không hợp lệ.');
+        }
+
         $license = sanitize_text_field($_POST['license_key']);
         $domain = $_SERVER['HTTP_HOST'];
 
@@ -53,7 +61,9 @@ function contact_plus_settings_page() {
     }
 
     $saved_license = get_option('contact_plus_license_key', '');
-    echo '<form method="post"><h2>Mã kích hoạt</h2>
+    echo '<form method="post">';
+    wp_nonce_field('contact_plus_activate');
+    echo '<h2>Mã kích hoạt</h2>
         <input name="license_key" value="' . esc_attr($saved_license) . '" placeholder="Nhập mã kích hoạt" style="width:300px;">
         <button type="submit" class="button button-primary">Kích hoạt</button>
         <div style="margin-top:12px; color:#0073aa; font-weight:600;">Hướng dẫn lấy mã kích hoạt tại: Jiangvux.weebly.com</div>
@@ -69,6 +79,7 @@ function contact_plus_settings_page() {
 
     echo '</div>';
 }
+
 
 add_action('admin_init', function() {
     $fields = [
