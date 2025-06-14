@@ -141,3 +141,29 @@ add_action('admin_init', function() {
         echo '<input type="number" name="zalo_position_offset" value="' . esc_attr(get_option('zalo_position_offset', 90)) . '" min="0">';
     }, 'contact-plus', 'main');
 });
+
+add_action('admin_enqueue_scripts', function($hook) {
+    if ($hook !== 'toplevel_page_contact-plus') return;
+
+    wp_enqueue_media();
+    wp_register_script('contact-plus-admin', '', [], '', true);
+    wp_enqueue_script('contact-plus-admin');
+    wp_add_inline_script('contact-plus-admin', "
+        jQuery(document).ready(function($){
+            $('.select-media').click(function(e){
+                e.preventDefault();
+                let target = $(this).data('target');
+                const frame = wp.media({
+                    title: 'Chọn ảnh',
+                    button: { text: 'Chọn ảnh này' },
+                    multiple: false
+                });
+                frame.on('select', function(){
+                    const url = frame.state().get('selection').first().toJSON().url;
+                    $('#' + target).val(url);
+                });
+                frame.open();
+            });
+        });
+    ");
+});
