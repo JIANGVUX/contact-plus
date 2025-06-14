@@ -9,131 +9,157 @@
 if (!defined('ABSPATH')) exit;
 
 require plugin_dir_path(__FILE__) . 'plugin-update-checker/plugin-update-checker.php';
+
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
-PucFactory::buildUpdateChecker(
+
+$updateChecker = PucFactory::buildUpdateChecker(
     'https://github.com/JIANGVUX/contact-plus/',
     __FILE__,
     'contact-plus'
 );
 
-/* ===== ADMIN MENU ===== */
 add_action('admin_menu', function() {
-    add_menu_page('Contact Plus', 'Contact Plus', 'manage_options', 'contact-plus', 'contact_plus_settings_page');
+    add_menu_page('Liên Hệ', 'Liên Hệ', 'manage_options', 'contact-plus', 'contact_plus_settings_page');
 });
 
-/* ===== SETTINGS PAGE ===== */
 function contact_plus_settings_page() {
-    ?>
-    <div class="wrap">
-        <h1>Contact Plus</h1>
+    $script_url = 'https://script.google.com/macros/s/AKfycbwdkbBHu3AI0ghcoo7MIWTTLizX9f03Ye4dyqcufys3nMyL0JVXZqUsMD2_43V5QmmQ/exec';
 
-        <!-- Form kích hoạt license -->
-        <?php
-        if (isset($_POST['license_key'])) {
-            check_admin_referer('cp_activate');
-            if (!current_user_can('manage_options')) wp_die('No access');
-            $license = sanitize_text_field($_POST['license_key']);
-            $domain = $_SERVER['HTTP_HOST'];
-            $script_url = 'https://.../exec';
-            $resp = wp_remote_get("$script_url?license=".urlencode($license)."&domain=".urlencode($domain));
-            $body = wp_remote_retrieve_body($resp);
-            if ($body==='VALID') {
-                update_option('contact_plus_license', $license);
-                echo '<div class="notice notice-success"><p>Activated!</p></div>';
-            } else {
-                echo '<div class="notice notice-error"><p>Invalid license.</p></div>';
-            }
-        }
-        ?>
-        <form method="post">
-            <?php wp_nonce_field('cp_activate'); ?>
-            <table class="form-table">
-                <tr>
-                    <th><label>Mã kích hoạt</label></th>
-                    <td><input type="text" name="license_key" value="<?php echo esc_attr(get_option('contact_plus_license','')); ?>" /></td>
-                </tr>
-            </table>
-            <?php submit_button('Kích hoạt'); ?>
-        </form>
+    if (isset($_POST['license_key'])) {
+    $license = sanitize_text_field($_POST['license_key']);
+    $domain = $_SERVER['HTTP_HOST'];
 
-        <?php if (get_option('contact_plus_license')): ?>
-        <!-- Form cấu hình -->
-        <form method="post" action="options.php">
-            <?php
-            settings_fields('contact_plus_settings');
-            do_settings_sections('contact-plus');
-            submit_button('Lưu thay đổi');
-            ?>
-        </form>
-        <?php endif; ?>
-    </div>
-    <?php
+    // Tạo URL kiểm tra license
+    $full_url = $script_url . '?license=' . urlencode($license) . '&domain=' . urlencode($domain);
+
+    // 👇 Ghi log URL vào debug.log
+    error_log('[Contact Plus] License check URL: ' . $full_url);
+
+    $response = wp_remote_get($full_url);
+    $body = !is_wp_error($response) ? wp_remote_retrieve_body($response) : '';
+
+    if ($body === 'VALID') {
+        update_option('contact_plus_license_key', $license);
+        wp_safe_redirect(admin_url('admin.php?page=contact-plus&activated=1'));
+        exit;
+    } else {
+        add_action('admin_notices', function() {
+            echo "<div class='notice notice-error is-dismissible'><p>Kích hoạt không thành công. Mã không hợp lệ hoặc bị từ chối.</p></div>";
+        });
+    }
 }
 
-/* ===== REGISTER SETTINGS ===== */
+
+    echo '<div class="wrap"><h1>Thiết lập Liên Hệ</h1>';
+
+    if (isset($_GET['activated']) && $_GET['activated'] === '1') {
+        echo "<div class='notice notice-success is-dismissible'><p>Kích hoạt thành công!</p></div>";
+    }
+
+    $saved_license = get_option('contact_plus_license_key', '');
+    echo '<form method="post"><h2>Mã kích hoạt</h2>
+        <input name="license_key" value="' . esc_attr($saved_license) . '" placeholder="Nhập mã kích hoạt" style="width:300px;">
+        <button type="submit" class="button button-primary">Kích hoạt</button>
+        <div style="margin-top:12px;">
+        <div style="margin-top:12px; color:#0073aa; font-weight:600;">
+        Hướng dẫn lấy mã kích hoạt tại: Jiangvux.weebly.com
+        </div>
+        </div>
+    </form><hr>';
+
+    if ($saved_license) {
+        echo '<h2>Cấu hình</h2><form method="post" action="options.php">';
+        settings_fields('contact_plus_settings');
+        do_settings_sections('contact-plus');
+        submit_button('Lưu thay đổi');
+        echo '</form>';
+    }
+
+    echo '</div>';
+}
+
 add_action('admin_init', function() {
     $fields = [
-        'zalo_enable','zalo_img','zalo_link',
-        'zalo_toggle_img','zalo_call_img','zalo_phone','zalo_position_side','zalo_position_offset',
-        // other platforms: messenger, shopee...
+        'zalo_enable','messenger_enable','shopee_enable','viber_enable','whatsapp_enable','lazada_enable','tiki_enable',
+        'zalo_toggle_img','zalo_phone','zalo_call_img','zalo_zalo_img','messenger_img','shopee_img','viber_img','whatsapp_img','lazada_img','tiki_img',
+        'messenger_link','shopee_link','viber_link','whatsapp_link','lazada_link','tiki_link',
+        'zalo_position_side','zalo_position_offset'
     ];
-    foreach ($fields as $f) register_setting('contact_plus_settings', $f);
-    add_settings_section('main','Cấu hình','', 'contact-plus');
-    foreach (['zalo'] as $key) {
-        add_settings_field("{$key}_enable","Bật $key",'cp_field_checkbox','contact-plus','main',[$key]);
-        add_settings_field("{$key}_img","Ảnh {$key}",'cp_field_media','contact-plus','main',[$key]);
-        add_settings_field("{$key}_link","Link {$key}",'cp_field_text','contact-plus','main',[$key]);
+    foreach ($fields as $field) {
+        register_setting('contact_plus_settings', $field);
     }
-    // Toggle, call, phone, offset
-    add_settings_field('zalo_toggle_img','Ảnh Toggle','cp_field_media','contact-plus','main',['zalo_toggle_img']);
-    add_settings_field('zalo_call_img','Ảnh Gọi','cp_field_media','contact-plus','main',['zalo_call_img']);
-    add_settings_field('zalo_phone','Số điện thoại','cp_field_text','contact-plus','main',['zalo_phone']);
-    add_settings_field('zalo_position_side','Vị trí','cp_field_select','contact-plus','main',['zalo_position_side',['left'=>'Trái','right'=>'Phải']]);
-    add_settings_field('zalo_position_offset','Cách đáy','cp_field_text','contact-plus','main',['zalo_position_offset']);
+
+    add_settings_section('main', 'Cấu hình hiển thị', null, 'contact-plus');
+
+    foreach (['zalo','messenger','shopee','viber','whatsapp','lazada','tiki'] as $key) {
+        add_settings_field($key.'_enable', "Bật $key", function() use ($key) {
+            echo '<input type="checkbox" name="'.$key.'_enable" value="1" ' . checked(get_option($key.'_enable'), '1', false) . '> Hiển thị '.ucfirst($key);
+        }, 'contact-plus', 'main');
+
+        add_settings_field($key.'_img', "Ảnh $key", function() use ($key) {
+            echo '<input type="text" name="'.$key.'_img" value="' . esc_attr(get_option($key.'_img')) . '" size="60">';
+        }, 'contact-plus', 'main');
+
+        add_settings_field($key.'_link', "Link $key", function() use ($key) {
+            echo '<input type="text" name="'.$key.'_link" value="' . esc_attr(get_option($key.'_link')) . '" size="60">';
+        }, 'contact-plus', 'main');
+    }
+
+    add_settings_field('zalo_phone', 'Số điện thoại', function() {
+        echo '<input type="text" name="zalo_phone" value="' . esc_attr(get_option('zalo_phone')) . '">';
+    }, 'contact-plus', 'main');
+
+    add_settings_field('zalo_position_side', 'Vị trí hiển thị', function() {
+        $side = get_option('zalo_position_side', 'right');
+        echo '<select name="zalo_position_side">
+            <option value="left"' . selected($side, 'left', false) . '>Trái</option>
+            <option value="right"' . selected($side, 'right', false) . '>Phải</option>
+        </select>';
+    }, 'contact-plus', 'main');
+
+    add_settings_field('zalo_position_offset', 'Cách đáy (px)', function() {
+        echo '<input type="number" name="zalo_position_offset" value="' . esc_attr(get_option('zalo_position_offset', 90)) . '" min="0">';
+    }, 'contact-plus', 'main');
 });
 
-/* ===== FIELD CALLBACKS ===== */
-function cp_field_checkbox($args) {
-    $key = $args[0];
-    echo "<input type='checkbox' name='$key' value='1' ".checked(get_option($key),1,false).">";
-}
-function cp_field_text($args) {
-    list($key,$opt)= $args;
-    $val = esc_attr(get_option($key,''));
-    echo "<input type='text' name='$key' value='$val' />";
-}
-function cp_field_select($args) {
-    list($key,$opts)= $args;
-    $sel = get_option($key,'');
-    echo "<select name='$key'>";
-    foreach ($opts as $v=>$l) echo "<option value='$v' ".selected($sel,$v,false).">$l</option>";
-    echo "</select>";
-}
-function cp_field_media($args) {
-    $key = $args[0];
-    $val = esc_attr(get_option($key,''));
-    echo "<input type='text' id='$key' name='$key' value='$val' size='60' />";
-    echo " <button class='button select-media' data-target='$key'>Chọn ảnh</button>";
-}
-
-/* ===== ENQUEUE MEDIA SCRIPT ===== */
-add_action('admin_enqueue_scripts', function($hook) {
-    if ($hook!=='toplevel_page_contact-plus') return;
-    wp_enqueue_media();
-    wp_register_script('cp_admin', '');
-    wp_enqueue_script('cp_admin');
-    wp_add_inline_script('cp_admin', "
-        jQuery(function($){
-            $('.select-media').click(function(e){
-                e.preventDefault();
-                let trg = $(this).data('target');
-                let frame = wp.media({multiple:false});
-                frame.on('select', function(){
-                    let url = frame.state().get('selection').first().toJSON().url;
-                    $('#' + trg).val(url);
-                });
-                frame.open();
-            });
-        });
-    ");
+add_action('wp_enqueue_scripts', function() {
+    wp_enqueue_style('contact-plus-style', plugins_url('assets/css/contact-plus.css', __FILE__));
+    wp_enqueue_script('contact-plus-script', plugins_url('assets/js/contact-plus.js', __FILE__), [], null, true);
 });
+
+add_action('wp_footer', function() {
+    if (!get_option('contact_plus_license_key')) return;
+
+    $phone = esc_attr(get_option('zalo_phone'));
+    $side = esc_attr(get_option('zalo_position_side', 'right'));
+    $bottom = intval(get_option('zalo_position_offset', 90));
+    $position_css = $side === 'left' ? 'left:12px;right:auto;' : 'right:12px;left:auto;';
+    $style_attr = $position_css . " bottom:{$bottom}px;";
+
+    $default_imgs = [
+        'call' => 'default-call.png','zalo' => 'default-zalo.png','messenger' => 'default-messenger.png','shopee' => 'default-shopee.png',
+        'viber' => 'default-viber.png','whatsapp' => 'default-whatsapp.png','lazada' => 'default-lazada.png','tiki' => 'default-tiki.png'
+    ];
+
+    $toggle_img = esc_url(get_option('zalo_toggle_img') ?: plugins_url('assets/images/default-toggle.png', __FILE__));
+    $call_img = esc_url(get_option('zalo_call_img') ?: plugins_url('assets/images/' . $default_imgs['call'], __FILE__));
+
+    echo "<div class='zalo-hotline' style='{$style_attr}'>
+            <div id='zalo-toggle' class='zalo-main-button' onclick='toggleZaloOptions(true)'>
+                <img src='{$toggle_img}' alt='Zalo Toggle' />
+            </div>
+            <div id='zalo-options' class='zalo-options'>
+                <a href='tel:{$phone}' target='_blank'><div class='zalo-option'><img src='{$call_img}' alt='Call' /></div></a>";
+
+    foreach (['zalo','messenger','shopee','viber','whatsapp','lazada','tiki'] as $btn) {
+        if (get_option($btn.'_enable') === '1') {
+            $img = esc_url(get_option($btn.'_img') ?: plugins_url('assets/images/' . $default_imgs[$btn], __FILE__));
+            $link = esc_url(get_option($btn.'_link'));
+            echo "<a href='{$link}' target='_blank'><div class='zalo-option'><img src='{$img}' alt='{$btn}' /></div></a>";
+        }
+    }
+
+    echo "<div class='zalo-option' onclick='toggleZaloOptions(false)'>❌</div>
+            </div>
+        </div>";
+}, 100);
