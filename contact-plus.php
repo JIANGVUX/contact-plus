@@ -166,16 +166,31 @@ add_action('wp_footer', function() {
     $position_css = $side === 'left' ? 'left:12px;right:auto;' : 'right:12px;left:auto;';
     $style_attr = $position_css . " bottom:{$bottom}px;";
 
+    $default_imgs = [
+        'zalo' => 'default-zalo.png',
+        'messenger' => 'default-messenger.png',
+        'shopee' => 'default-shopee.png',
+        'viber' => 'default-viber.png',
+        'whatsapp' => 'default-whatsapp.png',
+        'lazada' => 'default-lazada.png',
+        'tiki' => 'default-tiki.png',
+        'call' => 'default-call.png',
+        'toggle' => 'default-toggle.png',
+    ];
+
+    $toggle_img = esc_url(get_option('zalo_toggle_img') ?: plugins_url('assets/images/' . $default_imgs['toggle'], __FILE__));
+    $call_img = esc_url(get_option('zalo_call_img') ?: plugins_url('assets/images/' . $default_imgs['call'], __FILE__));
+
     echo "<div class='zalo-hotline' style='{$style_attr}'>
             <div id='zalo-toggle' class='zalo-main-button' onclick='toggleZaloOptions(true)'>
-                <img src='" . esc_url(get_option('zalo_toggle_img')) . "' alt='Zalo Toggle' />
+                <img src='{$toggle_img}' alt='Zalo Toggle' />
             </div>
             <div id='zalo-options' class='zalo-options'>
-                <a href='tel:{$phone}' target='_blank'><div class='zalo-option'><img src='" . esc_url(get_option('zalo_call_img')) . "' alt='Call' /></div></a>";
+                <a href='tel:{$phone}' target='_blank'><div class='zalo-option'><img src='{$call_img}' alt='Call' /></div></a>";
 
     foreach (['zalo','messenger','shopee','viber','whatsapp','lazada','tiki'] as $btn) {
         if (get_option($btn.'_enable') === '1') {
-            $img = esc_url(get_option($btn.'_img'));
+            $img = esc_url(get_option($btn.'_img') ?: plugins_url('assets/images/' . $default_imgs[$btn], __FILE__));
             $link = esc_url(get_option($btn.'_link'));
             if ($btn === 'zalo' && empty($link)) {
                 $phone_raw = preg_replace('/[^0-9]/', '', get_option('zalo_phone'));
