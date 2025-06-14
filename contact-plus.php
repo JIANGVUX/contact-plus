@@ -1,9 +1,9 @@
 <?php
 /**
  * Plugin Name: Contact Plus
- * Description: Plugin hiển thị nút liên hệ nổi có tuý chỉnh thiết lập
- * Version: 2.5.1
- * Author: JiangVux (modified)
+ * Description: Plugin hiển thị nút liên hệ nổi có tùy chỉnh thiết lập
+ * Version: 2.4.5
+ * Author: JiangVux
  */
 
 if (!defined('ABSPATH')) exit;
@@ -26,48 +26,44 @@ function contact_plus_settings_page() {
     $script_url = 'https://script.google.com/macros/s/AKfycbzlNq4fe7RhAhZlSFfRKRopul6W_9fHJFCYH14X7p81zXymkEHzI0xqqSV49IkilLnu/exec';
 
     if (isset($_POST['license_key'])) {
-        $license = sanitize_text_field($_POST['license_key']);
-        $domain = $_SERVER['HTTP_HOST'];
+    $license = sanitize_text_field($_POST['license_key']);
+    $domain = $_SERVER['HTTP_HOST'];
 
-        $full_url = $script_url . '?license=' . urlencode($license) . '&domain=' . urlencode($domain);
-        error_log('[Contact Plus] License check URL: ' . $full_url);
+    // Tạo URL kiểm tra license
+    $full_url = $script_url . '?license=' . urlencode($license) . '&domain=' . urlencode($domain);
 
-        $response = wp_remote_get($full_url);
+    // 👉 Ghi log URL vào debug.log
+    error_log('[Contact Plus] License check URL: ' . $full_url);
 
-        if (is_wp_error($response)) {
-            $error_message = $response->get_error_message();
-            error_log('[Contact Plus] ❌ Lỗi kết nối: ' . $error_message);
+    $response = wp_remote_get($full_url);
+    $body = !is_wp_error($response) ? wp_remote_retrieve_body($response) : '';
 
-            add_action('admin_notices', function() use ($error_message) {
-                echo "<div class='notice notice-error is-dismissible'><p>❌ Kết nối xác minh thất bại: $error_message</p></div>";
-            });
-
-        } else {
-            $body = wp_remote_retrieve_body($response);
-            if ($body === 'VALID') {
-                update_option('contact_plus_license_key', $license);
-                wp_safe_redirect(admin_url('admin.php?page=contact-plus&activated=1'));
-                exit;
-            } else {
-                add_action('admin_notices', function() {
-                    echo "<div class='notice notice-error is-dismissible'><p>❌ Mã kích hoạt không hợp lệ hoặc bị tứ chối.</p></div>";
-                });
-            }
-        }
+    if ($body === 'VALID') {
+        update_option('contact_plus_license_key', $license);
+        wp_safe_redirect(admin_url('admin.php?page=contact-plus&activated=1'));
+        exit;
+    } else {
+        add_action('admin_notices', function() {
+            echo "<div class='notice notice-error is-dismissible'><p>Kích hoạt không thành công. Mã không hợp lệ hoặc bị từ chối.</p></div>";
+        });
     }
+}
+
 
     echo '<div class="wrap"><h1>Thiết lập Liên Hệ</h1>';
 
     if (isset($_GET['activated']) && $_GET['activated'] === '1') {
-        echo "<div class='notice notice-success is-dismissible'><p>✅ Kích hoạt thành công!</p></div>";
+        echo "<div class='notice notice-success is-dismissible'><p>Kích hoạt thành công!</p></div>";
     }
 
     $saved_license = get_option('contact_plus_license_key', '');
     echo '<form method="post"><h2>Mã kích hoạt</h2>
         <input name="license_key" value="' . esc_attr($saved_license) . '" placeholder="Nhập mã kích hoạt" style="width:300px;">
         <button type="submit" class="button button-primary">Kích hoạt</button>
+        <div style="margin-top:12px;">
         <div style="margin-top:12px; color:#0073aa; font-weight:600;">
         Hướng dẫn lấy mã kích hoạt tại: Jiangvux.weebly.com
+        </div>
         </div>
     </form><hr>';
 
@@ -117,7 +113,7 @@ add_action('admin_init', function() {
         $side = get_option('zalo_position_side', 'right');
         echo '<select name="zalo_position_side">
             <option value="left"' . selected($side, 'left', false) . '>Trái</option>
-            <option value="right"' . selected($side, 'right', false) . '>Đúc</option>
+            <option value="right"' . selected($side, 'right', false) . '>Phải</option>
         </select>';
     }, 'contact-plus', 'main');
 
