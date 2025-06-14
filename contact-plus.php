@@ -1,9 +1,9 @@
 <?php
 /**
  * Plugin Name: Contact Plus
- * Description: Plugin hiển thị nút liên hệ nổi có tùy chỉnh thiết lập
- * Version: 2.4.6
- * Author: JiangVux (cập nhật bởi anh_lập_trình)
+ * Description: Plugin contact plus - tạo nút liên hệ cho wordpres chuyên nghiệp
+ * Version: 2.4.7
+ * Author: JiangVux
  */
 
 if (!defined('ABSPATH')) exit;
