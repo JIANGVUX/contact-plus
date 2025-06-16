@@ -32,19 +32,11 @@ add_action('admin_menu', function() {
 
 function contact_plus_settings_page() {
     if (!defined('CONTACT_PLUS_LICENSE_API')) {
-        error_log('[Contact Plus] Thiếu CONTACT_PLUS_LICENSE_API. Vui lòng kiểm tra file config.php');
-        echo "<div class='notice notice-error'><p>Thiếu đường dẫn API kích hoạt. Vui lòng cấu hình file <code>config.php</code>.</p></div>";
+        echo '<div class="notice notice-error is-dismissible"><p><strong>Thiếu đường dẫn API kích hoạt.</strong> Vui lòng cấu hình file <code>config.php</code>.</p></div>';
         return;
     }
 
     $script_url = CONTACT_PLUS_LICENSE_API;
-
-
-
-
-
-    error_log('[DEBUG] script_url = ' . $script_url);
-
 
     if (isset($_POST['license_key'])) {
         $license = sanitize_text_field($_POST['license_key']);
@@ -88,6 +80,7 @@ function contact_plus_settings_page() {
 
     echo '</div>';
 }
+
 
 
 add_action('admin_init', function() {
