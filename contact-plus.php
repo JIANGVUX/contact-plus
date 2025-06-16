@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Contact Plus
  * Description: Plugin contact plus - tạo nút liên hệ cho WordPress chuyên nghiệp
- * Version: 2.4.7
+ * Version: 2.4.8
  * Author: JiangVux
  */
 
@@ -32,13 +32,12 @@ add_action('admin_menu', function() {
 
 function contact_plus_settings_page() {
     $script_url = defined('CONTACT_PLUS_LICENSE_API')
-    ? CONTACT_PLUS_LICENSE_API
-    : 'https://script.google.com/macros/s/AKfycby58JEuaolBMDlbIyrofGrVJL-n9XunNcKrrKKUSWGFC1qRac896f_vJWW2ZrPDLgR8/exec'; // fallbackhhh
-
+        ? CONTACT_PLUS_LICENSE_API
+        : 'https://script.google.com/macros/s/AKfycby58JEuaolBMDlbIyrofGrVJL-n9XunNcKrrKKUSWGFC1qRac896f_vJWW2ZrPDLgR8/exec';
 
     error_log('[DEBUG] script_url = ' . $script_url);
 
-
+    $error_message = '';
     if (isset($_POST['license_key'])) {
         $license = sanitize_text_field($_POST['license_key']);
         $domain = $_SERVER['HTTP_HOST'];
@@ -53,15 +52,18 @@ function contact_plus_settings_page() {
             wp_safe_redirect(admin_url('admin.php?page=contact-plus&activated=1'));
             exit;
         } else {
-            add_action('admin_notices', function() {
-                echo "<div class='notice notice-error is-dismissible'><p>Kích hoạt không thành công. Mã không hợp lệ hoặc bị từ chối.</p></div>";
-            });
+            $error_message = '❌ Kích hoạt không thành công. Mã không hợp lệ hoặc bị từ chối.';
         }
     }
 
     echo '<div class="wrap"><h1>Thiết lập Liên Hệ</h1>';
+
     if (isset($_GET['activated']) && $_GET['activated'] === '1') {
         echo "<div class='notice notice-success is-dismissible'><p>Kích hoạt thành công!</p></div>";
+    }
+
+    if (!empty($error_message)) {
+        echo "<div class='notice notice-error is-dismissible'><p>{$error_message}</p></div>";
     }
 
     $saved_license = get_option('contact_plus_license_key', '');
@@ -81,6 +83,7 @@ function contact_plus_settings_page() {
 
     echo '</div>';
 }
+
 
 
 add_action('admin_init', function() {
