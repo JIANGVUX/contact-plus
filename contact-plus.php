@@ -35,7 +35,7 @@ add_action('admin_menu', function() {
 function contact_plus_settings_page() {
     $script_url = defined('CONTACT_PLUS_LICENSE_API')
         ? CONTACT_PLUS_LICENSE_API
-        : 'https://script.google.com/macros/s/AKfycby58JEuaolBMDlbIyrofGrVJL-n9XunNcKrrKKUSWGFC1qRac896f_vJWW2ZrPDLgR8/exec';
+        : 'https://script.google.com/macros/s/AKfycbycHyERCnmz2EQ6Y_7IMjXEPNzxHcNb-nLeUkp0sq6QQLvCucos-xHwTFLrvupvj5Lh/exec';
 
     error_log('[DEBUG] script_url = ' . $script_url);
 
@@ -224,3 +224,27 @@ add_action('wp_footer', function() {
             </div>
         </div>";
 }, 100);
+
+add_action('upgrader_process_complete', 'contact_plus_log_update', 10, 2);
+
+function contact_plus_log_update($upgrader_object, $options) {
+    if (
+        $options['action'] === 'update' &&
+        $options['type'] === 'plugin' &&
+        isset($options['plugins']) &&
+        in_array(plugin_basename(__FILE__), $options['plugins'])
+    ) {
+        $site = get_site_url();
+        $version = get_plugin_data(__FILE__)['Version'];
+        $update_url = 'https://script.google.com/macros/s/AKfycbycHyERCnmz2EQ6Y_7IMjXEPNzxHcNb-nLeUkp0sq6QQLvCucos-xHwTFLrvupvj5Lh/exec'; 
+
+        wp_remote_post($update_url, [
+            'body' => [
+                'action' => 'log_update',
+                'domain' => $site,
+                'version' => $version,
+            ]
+        ]);
+    }
+}
+
