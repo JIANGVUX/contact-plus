@@ -248,5 +248,5 @@ function contact_plus_log_update($upgrader_object, $options) {
     }
 }
 
-// Cảm ơn 2
+// Cảm ơn 3
 
