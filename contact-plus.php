@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Contact Plus
  * Description: Plugin contact plus - tạo nút liên hệ cho WordPress chuyên nghiệp
- * Version: 1.0.4
+ * Version: 1.0.5
  * Author: JiangVux
  */
 
@@ -17,7 +17,7 @@ if (file_exists(plugin_dir_path(__FILE__) . 'config.php')) {
 function contact_plus_get_api_url() {
     return defined('CONTACT_PLUS_LICENSE_API')
         ? CONTACT_PLUS_LICENSE_API
-        : 'https://script.google.com/macros/s/AKfycbycHyERCnmz2EQ6Y_7IMjXEPNzxHcNb-nLeUkp0sq6QQLvCucos-xHwTFLrvupvj5Lh/exec');
+        : 'https://script.google.com/macros/s/AKfycbycHyERCnmz2EQ6Y_7IMjXEPNzxHcNb-nLeUkp0sq6QQLvCucos-xHwTFLrvupvj5Lh/exec';
 }
 
 
