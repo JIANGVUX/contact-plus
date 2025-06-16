@@ -14,6 +14,13 @@ if (file_exists(plugin_dir_path(__FILE__) . 'config.php')) {
     error_log('[Contact Plus] Missing config.php');
 }
 
+function contact_plus_get_api_url() {
+    return defined('CONTACT_PLUS_LICENSE_API')
+        ? CONTACT_PLUS_LICENSE_API
+        : 'https://script.google.com/macros/s/AKfycbycHyERCnmz2EQ6Y_7IMjXEPNzxHcNb-nLeUkp0sq6QQLvCucos-xHwTFLrvupvj5Lh/exec');
+}
+
+
 require plugin_dir_path(__FILE__) . 'plugin-update-checker/plugin-update-checker.php';
 
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
@@ -26,6 +33,22 @@ $updateChecker = PucFactory::buildUpdateChecker(
     'contact-plus'
 );
 
+register_activation_hook(__FILE__, 'contact_plus_log_activation');
+
+function contact_plus_log_activation() {
+    $site = parse_url(get_site_url(), PHP_URL_HOST);
+    $version = get_plugin_data(__FILE__)['Version'];
+    $update_url = contact_plus_get_api_url();
+
+    wp_remote_post($update_url, [
+        'body' => [
+            'action' => 'log_install',
+            'domain' => $site,
+            'version' => $version,
+        ]
+    ]);
+}
+
 
 add_action('admin_menu', function() {
     add_menu_page('Liên Hệ', 'Liên Hệ', 'manage_options', 'contact-plus', 'contact_plus_settings_page','dashicons-format-chat
@@ -33,9 +56,7 @@ add_action('admin_menu', function() {
 });
 
 function contact_plus_settings_page() {
-    $script_url = defined('CONTACT_PLUS_LICENSE_API')
-        ? CONTACT_PLUS_LICENSE_API
-        : 'https://script.google.com/macros/s/AKfycbycHyERCnmz2EQ6Y_7IMjXEPNzxHcNb-nLeUkp0sq6QQLvCucos-xHwTFLrvupvj5Lh/exec';
+    $script_url = contact_plus_get_api_url();
 
     error_log('[DEBUG] script_url = ' . $script_url);
 
@@ -236,7 +257,7 @@ function contact_plus_log_update($upgrader_object, $options) {
     ) {
         $site = parse_url(get_site_url(), PHP_URL_HOST); 
         $version = get_plugin_data(__FILE__)['Version'];
-        $update_url = 'https://script.google.com/macros/s/AKfycbycHyERCnmz2EQ6Y_7IMjXEPNzxHcNb-nLeUkp0sq6QQLvCucos-xHwTFLrvupvj5Lh/exec';
+        $update_url = contact_plus_get_api_url();
 
         wp_remote_post($update_url, [
             'body' => [
