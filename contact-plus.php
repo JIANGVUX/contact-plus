@@ -31,9 +31,15 @@ add_action('admin_menu', function() {
 });
 
 function contact_plus_settings_page() {
-    $script_url = defined('CONTACT_PLUS_LICENSE_API')
-    ? CONTACT_PLUS_LICENSE_API
-    : base64_decode('aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvc2UvQUtmeWNib2RrYkhydTNBSTBnaGNvbzdNSVdUVExpekcufys3nMyL0JVXZqUsMD2_43V5QmmQvZXhlYw==');
+    if (!defined('CONTACT_PLUS_LICENSE_API')) {
+        error_log('[Contact Plus] Thiếu CONTACT_PLUS_LICENSE_API. Vui lòng kiểm tra file config.php');
+        echo "<div class='notice notice-error'><p>Thiếu đường dẫn API kích hoạt. Vui lòng cấu hình file <code>config.php</code>.</p></div>";
+        return;
+    }
+
+    $script_url = CONTACT_PLUS_LICENSE_API;
+
+
 
 
 
