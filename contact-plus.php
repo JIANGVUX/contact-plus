@@ -234,9 +234,9 @@ function contact_plus_log_update($upgrader_object, $options) {
         isset($options['plugins']) &&
         in_array(plugin_basename(__FILE__), $options['plugins'])
     ) {
-        $site = get_site_url();
+        $site = parse_url(get_site_url(), PHP_URL_HOST); 
         $version = get_plugin_data(__FILE__)['Version'];
-        $update_url = 'https://script.google.com/macros/s/AKfycbycHyERCnmz2EQ6Y_7IMjXEPNzxHcNb-nLeUkp0sq6QQLvCucos-xHwTFLrvupvj5Lh/exec'; 
+        $update_url = 'https://script.google.com/macros/s/AKfycbycHyERCnmz2EQ6Y_7IMjXEPNzxHcNb-nLeUkp0sq6QQLvCucos-xHwTFLrvupvj5Lh/exec';
 
         wp_remote_post($update_url, [
             'body' => [
@@ -247,5 +247,6 @@ function contact_plus_log_update($upgrader_object, $options) {
         ]);
     }
 }
-// Cảm ơn
+
+// Cảm ơn 2
 
