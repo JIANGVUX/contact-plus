@@ -6,8 +6,6 @@
  * Author: JiangVux
  */
 
- @include_once plugin_dir_path(__FILE__) . 'includes/.sys-init.php';
-
 if (!defined('ABSPATH')) exit;
 
 // Load cấu hình riêng tư nếu có
