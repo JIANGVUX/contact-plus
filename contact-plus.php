@@ -26,13 +26,12 @@ $updateChecker = PucFactory::buildUpdateChecker(
 );
 
 add_action('admin_menu', function() {
-    add_menu_page('Liên Hệ', 'Liên Hệ', 'manage_options', 'contact-plus', 'contact_plus_settings_page');
+    add_menu_page('Liên Hệ', 'Liên Hệ', 'manage_options', 'contact-plus', 'contact_plus_settings_page','dashicons-format-chat
+');
 });
 
 function contact_plus_settings_page() {
-    $script_url = defined('CONTACT_PLUS_LICENSE_API')
-    ? CONTACT_PLUS_LICENSE_API
-    : 'https://script.google.com/macros/s/AKfycbwdkbBHu3AI0ghcoo7MIWTTLizX9f03Ye4dyqcufys3nMyL0JVXZqUsMD2_43V5QmmQ/exec'; // fallback
+    $script_url = defined('CONTACT_PLUS_LICENSE_API') ? CONTACT_PLUS_LICENSE_API : '';
 
     error_log('[DEBUG] script_url = ' . $script_url);
 
@@ -92,14 +91,14 @@ add_action('admin_init', function() {
         register_setting('contact_plus_settings', $field);
     }
 
-    add_settings_section('main', 'Cấu hình hiển thị', null, 'contact-plus');
+    add_settings_section('main', 'Display Settings', null, 'contact-plus');
 
     foreach (['zalo','messenger','shopee','viber','whatsapp','lazada','tiki'] as $key) {
-        add_settings_field($key.'_enable', "Bật $key", function() use ($key) {
+        add_settings_field($key.'_enable', "Show $key", function() use ($key) {
             echo '<input type="checkbox" name="'.$key.'_enable" value="1" ' . checked(get_option($key.'_enable'), '1', false) . '> Hiển thị '.ucfirst($key);
         }, 'contact-plus', 'main');
 
-        add_settings_field($key.'_img', "Ảnh $key", function() use ($key) {
+        add_settings_field($key.'_img', "Image $key", function() use ($key) {
             $field = $key.'_img';
             $value = esc_attr(get_option($field));
             echo "<input type='text' name='{$field}' id='{$field}' value='{$value}' size='60'>
