@@ -2,13 +2,12 @@
 /**
  * Plugin Name: Contact Plus
  * Description: Plugin contact plus - tạo nút liên hệ cho WordPress chuyên nghiệp
- * Version: 2.4.8
+ * Version: 2.4.9
  * Author: JiangVux
  */
 
 if (!defined('ABSPATH')) exit;
 
-// Load cấu hình riêng tư nếu có
 if (file_exists(plugin_dir_path(__FILE__) . 'config.php')) {
     require_once plugin_dir_path(__FILE__) . 'config.php';
 } else {
@@ -20,10 +19,13 @@ require plugin_dir_path(__FILE__) . 'plugin-update-checker/plugin-update-checker
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
 $updateChecker = PucFactory::buildUpdateChecker(
-    defined('CONTACT_PLUS_UPDATE_URL') ? CONTACT_PLUS_UPDATE_URL : '',
+    defined('CONTACT_PLUS_UPDATE_URL')
+        ? CONTACT_PLUS_UPDATE_URL
+        : 'https://github.com/JIANGVUX/contact-plus/',
     __FILE__,
     'contact-plus'
 );
+
 
 add_action('admin_menu', function() {
     add_menu_page('Liên Hệ', 'Liên Hệ', 'manage_options', 'contact-plus', 'contact_plus_settings_page','dashicons-format-chat
