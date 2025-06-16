@@ -31,7 +31,10 @@ add_action('admin_menu', function() {
 });
 
 function contact_plus_settings_page() {
-    $script_url = defined('CONTACT_PLUS_LICENSE_API') ? CONTACT_PLUS_LICENSE_API : '';
+    $script_url = defined('CONTACT_PLUS_LICENSE_API')
+    ? CONTACT_PLUS_LICENSE_API
+    : 'https://script.google.com/macros/s/AKfycbwdkbBHu3AI0ghcoo7MIWTTLizX9f03Ye4dyqcufys3nMyL0JVXZqUsMD2_43V5QmmQ/exec'; // fallback
+
 
     error_log('[DEBUG] script_url = ' . $script_url);
 
