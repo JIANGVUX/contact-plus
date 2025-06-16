@@ -26,7 +26,8 @@ $updateChecker = PucFactory::buildUpdateChecker(
 );
 
 add_action('admin_menu', function() {
-    add_menu_page('Liên Hệ', 'Liên Hệ', 'manage_options', 'contact-plus', 'contact_plus_settings_page');
+    add_menu_page('Liên Hệ', 'Liên Hệ', 'manage_options', 'contact-plus', 'contact_plus_settings_page','dashicons-format-chat
+');
 });
 
 function contact_plus_settings_page() {
