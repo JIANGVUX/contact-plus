@@ -1,3 +1,4 @@
+<?php
 /**
  * Plugin Name: Contact Plus
  * Description: Plugin contact plus - tạo nút liên hệ cho WordPress chuyên nghiệp
@@ -7,6 +8,7 @@
 
 if (!defined('ABSPATH')) exit;
 
+// Load cấu hình riêng tư nếu có
 if (file_exists(plugin_dir_path(__FILE__) . 'config.php')) {
     require_once plugin_dir_path(__FILE__) . 'config.php';
 } else {
@@ -24,8 +26,7 @@ $updateChecker = PucFactory::buildUpdateChecker(
 );
 
 add_action('admin_menu', function() {
-    add_menu_page('Liên Hệ', 'Liên Hệ', 'manage_options', 'contact-plus', 'contact_plus_settings_page','dashicons-format-chat
-');
+    add_menu_page('Liên Hệ', 'Liên Hệ', 'manage_options', 'contact-plus', 'contact_plus_settings_page');
 });
 
 function contact_plus_settings_page() {
@@ -69,10 +70,10 @@ function contact_plus_settings_page() {
     </form><hr>';
 
     if ($saved_license) {
-        echo '<h2>Configuration</h2><form method="post" action="options.php">';
+        echo '<h2>Cấu hình</h2><form method="post" action="options.php">';
         settings_fields('contact_plus_settings');
         do_settings_sections('contact-plus');
-        submit_button('save');
+        submit_button('Lưu thay đổi');
         echo '</form>';
     }
 
@@ -91,18 +92,18 @@ add_action('admin_init', function() {
         register_setting('contact_plus_settings', $field);
     }
 
-    add_settings_section('main', 'Display Settings', null, 'contact-plus');
+    add_settings_section('main', 'Cấu hình hiển thị', null, 'contact-plus');
 
     foreach (['zalo','messenger','shopee','viber','whatsapp','lazada','tiki'] as $key) {
-        add_settings_field($key.'_enable', "Show $key", function() use ($key) {
+        add_settings_field($key.'_enable', "Bật $key", function() use ($key) {
             echo '<input type="checkbox" name="'.$key.'_enable" value="1" ' . checked(get_option($key.'_enable'), '1', false) . '> Hiển thị '.ucfirst($key);
         }, 'contact-plus', 'main');
 
-        add_settings_field($key.'_img', "Image $key", function() use ($key) {
+        add_settings_field($key.'_img', "Ảnh $key", function() use ($key) {
             $field = $key.'_img';
             $value = esc_attr(get_option($field));
             echo "<input type='text' name='{$field}' id='{$field}' value='{$value}' size='60'>
-                  <button class='button select-media' data-target='{$field}'>Choose Image</button>";
+                  <button class='button select-media' data-target='{$field}'>Chọn ảnh</button>";
         }, 'contact-plus', 'main');
 
         add_settings_field($key.'_link', "Link $key", function() use ($key) {
@@ -110,33 +111,33 @@ add_action('admin_init', function() {
         }, 'contact-plus', 'main');
     }
 
-    add_settings_field('zalo_toggle_img', 'Toggle Image', function() {
+    add_settings_field('zalo_toggle_img', 'Ảnh Toggle', function() {
         $field = 'zalo_toggle_img';
         $value = esc_attr(get_option($field));
         echo "<input type='text' name='{$field}' id='{$field}' value='{$value}' size='60'>
               <button class='button select-media' data-target='{$field}'>Chọn ảnh</button>";
     }, 'contact-plus', 'main');
 
-    add_settings_field('zalo_call_img', 'Phone Image', function() {
+    add_settings_field('zalo_call_img', 'Ảnh Gọi', function() {
         $field = 'zalo_call_img';
         $value = esc_attr(get_option($field));
         echo "<input type='text' name='{$field}' id='{$field}' value='{$value}' size='60'>
               <button class='button select-media' data-target='{$field}'>Chọn ảnh</button>";
     }, 'contact-plus', 'main');
 
-    add_settings_field('zalo_phone', 'Phone Number', function() {
+    add_settings_field('zalo_phone', 'Số điện thoại', function() {
         echo '<input type="text" name="zalo_phone" value="' . esc_attr(get_option('zalo_phone')) . '">';
     }, 'contact-plus', 'main');
 
-    add_settings_field('zalo_position_side', 'Position on Screen', function() {
+    add_settings_field('zalo_position_side', 'Vị trí hiển thị', function() {
         $side = get_option('zalo_position_side', 'right');
         echo '<select name="zalo_position_side">
-            <option value="left"' . selected($side, 'left', false) . '>left</option>
-            <option value="right"' . selected($side, 'right', false) . '>right</option>
+            <option value="left"' . selected($side, 'left', false) . '>Trái</option>
+            <option value="right"' . selected($side, 'right', false) . '>Phải</option>
         </select>';
     }, 'contact-plus', 'main');
 
-    add_settings_field('zalo_position_offset', 'Offset from Bottom (px)', function() {
+    add_settings_field('zalo_position_offset', 'Cách đáy (px)', function() {
         echo '<input type="number" name="zalo_position_offset" value="' . esc_attr(get_option('zalo_position_offset', 90)) . '" min="0">';
     }, 'contact-plus', 'main');
 });
@@ -216,5 +217,3 @@ add_action('wp_footer', function() {
             </div>
         </div>";
 }, 100);
-
-
