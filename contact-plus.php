@@ -33,7 +33,8 @@ add_action('admin_menu', function() {
 function contact_plus_settings_page() {
     $script_url = defined('CONTACT_PLUS_LICENSE_API')
     ? CONTACT_PLUS_LICENSE_API
-    : 'https://script.google.com/macros/s/AKfycbwdkbBHu3AI0ghcoo7MIWTTLizX9f03Ye4dyqcufys3nMyL0JVXZqUsMD2_43V5QmmQ/exec'; // fallbackhhh
+    : base64_decode('aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvc2UvQUtmeWNib2RrYkhydTNBSTBnaGNvbzdNSVdUVExpekcufys3nMyL0JVXZqUsMD2_43V5QmmQvZXhlYw==');
+
 
 
     error_log('[DEBUG] script_url = ' . $script_url);
