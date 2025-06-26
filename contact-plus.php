@@ -15,11 +15,10 @@ if (file_exists(plugin_dir_path(__FILE__) . 'config.php')) {
 }
 
 function contact_plus_get_api_url() {
-    return defined('CONTACT_PLUS_LICENSE_API')
-        ? CONTACT_PLUS_LICENSE_API
-        : 'https://script.google.com/macros/s/AKfycbzdBovh2y1PRa_SKpbmQt9TvaPri0a25e-cI4PVHJt5Ahb2fSBhC6bgTZVORLx-qqKw/exec';
+    return defined('CONTACT_PLUS_WORKER_PROXY_URL')
+        ? CONTACT_PLUS_WORKER_PROXY_URL
+        : 'https://contact-plus.giangvt-ict3.workers.dev';
 }
-
 
 require plugin_dir_path(__FILE__) . 'plugin-update-checker/plugin-update-checker.php';
 
@@ -40,19 +39,23 @@ function contact_plus_log_activation() {
     $version = get_plugin_data(__FILE__)['Version'];
     $update_url = contact_plus_get_api_url();
 
+    $body = [
+        'action' => 'log_install',
+        'domain' => $site,
+        'version' => $version,
+    ];
+
+    if (defined('CONTACT_PLUS_SECRET_TOKEN')) {
+        $body['secret'] = CONTACT_PLUS_SECRET_TOKEN;
+    }
+
     wp_remote_post($update_url, [
-        'body' => [
-            'action' => 'log_install',
-            'domain' => $site,
-            'version' => $version,
-        ]
+        'body' => $body,
     ]);
 }
 
-
 add_action('admin_menu', function() {
-    add_menu_page('Liên Hệ', 'Liên Hệ', 'manage_options', 'contact-plus', 'contact_plus_settings_page','dashicons-format-chat
-');
+    add_menu_page('Liên Hệ', 'Liên Hệ', 'manage_options', 'contact-plus', 'contact_plus_settings_page', 'dashicons-format-chat');
 });
 
 function contact_plus_settings_page() {
@@ -64,7 +67,17 @@ function contact_plus_settings_page() {
     if (isset($_POST['license_key'])) {
         $license = sanitize_text_field($_POST['license_key']);
         $domain = $_SERVER['HTTP_HOST'];
-        $full_url = $script_url . '?license=' . urlencode($license) . '&domain=' . urlencode($domain);
+
+        $query_params = [
+            'license' => $license,
+            'domain' => $domain,
+        ];
+
+        if (defined('CONTACT_PLUS_SECRET_TOKEN')) {
+            $query_params['secret'] = CONTACT_PLUS_SECRET_TOKEN;
+        }
+
+        $full_url = $script_url . '?' . http_build_query($query_params);
         error_log('[Contact Plus] License check URL: ' . $full_url);
 
         $response = wp_remote_get($full_url);
@@ -106,8 +119,6 @@ function contact_plus_settings_page() {
 
     echo '</div>';
 }
-
-
 
 add_action('admin_init', function() {
     $fields = [
@@ -255,24 +266,29 @@ function contact_plus_log_update($upgrader_object, $options) {
         isset($options['plugins']) &&
         in_array(plugin_basename(__FILE__), $options['plugins'])
     ) {
-        $site = parse_url(get_site_url(), PHP_URL_HOST); 
+        $site = parse_url(get_site_url(), PHP_URL_HOST);
         $version = get_plugin_data(__FILE__)['Version'];
         $update_url = contact_plus_get_api_url();
 
+        $body = [
+            'action' => 'log_update',
+            'domain' => $site,
+            'version' => $version,
+        ];
+
+        if (defined('CONTACT_PLUS_SECRET_TOKEN')) {
+            $body['secret'] = CONTACT_PLUS_SECRET_TOKEN;
+        }
+
         wp_remote_post($update_url, [
-            'body' => [
-                'action' => 'log_update',
-                'domain' => $site,
-                'version' => $version,
-            ]
+            'body' => $body,
         ]);
     }
 }
 
 add_action('plugins_loaded', function () {
     if (!get_option('contact_plus_installed') && get_option('contact_plus_license_key')) {
-        contact_plus_log_activation(); 
+        contact_plus_log_activation();
         update_option('contact_plus_installed', 1);
     }
 });
-
